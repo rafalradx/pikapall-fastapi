@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-from src.routes import auth
+from src.routes import auth, tags
 import os
 from pathlib import Path
 from dependencies import get_redis_client
@@ -15,6 +15,7 @@ app.mount(
 
 
 app.include_router(auth.router, prefix="/api")
+app.include_router(tags.router, prefix="/api")
 # app.include_router(contacts.router, prefix="/api")
 # app.include_router(users.router, prefix="/api")
 
