@@ -3,6 +3,7 @@ from src.database.models import User
 from src.schemas.users import UserIn, UserOut
 from sqlalchemy.orm import Session
 from libgravatar import Gravatar
+from fastapi import HTTPException
 
 
 class UserRepository(AbstractUserRepository):
@@ -73,9 +74,12 @@ class UserRepository(AbstractUserRepository):
 
         :return: None
         """
-        user = await self.get_user_by_email(email)
-        user.confirmed = True
-        self._session.commit()
+        try:
+            user = await self.get_user_by_email(email)
+            user.confirmed = True
+            self._session.commit()
+        except:
+            raise HTTPException(status_code=404, detail="User not found")
 
     async def update_avatar(self, email, url: str) -> UserOut:
         """
@@ -89,7 +93,10 @@ class UserRepository(AbstractUserRepository):
         :return: A UserOut object representing the updated user.
         :rtype: UserOut
         """
-        user = await self.get_user_by_email(email)
-        user.avatar = url
-        self._session.commit()
-        return user
+        try:
+            user = await self.get_user_by_email(email)
+            user.avatar = url
+            self._session.commit()
+            return user
+        except:
+            raise HTTPException(status_code=404, detail="User not found")
