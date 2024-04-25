@@ -1,10 +1,10 @@
 from sqlalchemy.orm import Session
 from typing import Optional, List
 from datetime import datetime
-from src.models.photo import Photo
+from src.database.models import Photo
 from src.schemas.photo import PhotoCreate, PhotoUpdate
 from src.services.auth import get_current_user
-from src.utils.cloudinary import upload_image_to_cloudinary
+from src.services.cloudinary import upload_image_to_cloudinary
 
 class PhotoService:
     def __init__(self, db: Session):
