@@ -41,6 +41,7 @@ class Photo(Base):
     )
     description = Column(Text)
     image_url = Column(String(255), nullable=False)
+    qr_code_url = Column(String(255))  #QRcode
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     user = relationship("User", back_populates="photos")
@@ -87,16 +88,25 @@ class Comment(Base):
     photo = relationship("Photo", back_populates="comments")
 
 
-class Rating(Base):
-    __tablename__ = "ratings"
+# class Rating(Base):
+#     __tablename__ = "ratings"
+#
+#     id = Column(Integer, primary_key=True)
+#     photo_id = Column(
+#         Integer, ForeignKey("photos.id", ondelete="CASCADE"), nullable=False
+#     )
+#     user_id = Column(
+#         Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+#     )
+#     rating = Column(Integer, nullable=False)
+#
+#     UniqueConstraint("photo_id", "user_id", name="unique_photo_rating")
 
-    id = Column(Integer, primary_key=True)
-    photo_id = Column(
-        Integer, ForeignKey("photos.id", ondelete="CASCADE"), nullable=False
-    )
-    user_id = Column(
-        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
-    )
-    rating = Column(Integer, nullable=False)
-
-    UniqueConstraint("photo_id", "user_id", name="unique_photo_rating")
+# class QRCode(Base):
+#     __tablename__ = 'qr_codes'
+#
+#     id = Column(Integer, primary_key=True)
+#     photo_id = Column(Integer, ForeignKey('photos.id', ondelete='CASCADE'), unique=True)
+#     qr_code_url = Column(String(255), nullable=False)
+#
+#     photo = relationship("Photo", back_populates="qr_code")
