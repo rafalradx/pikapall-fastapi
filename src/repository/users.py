@@ -1,6 +1,6 @@
 from src.repository.abstract import AbstractUserRepository
 from src.database.models import User
-from src.schemas.users import UserIn, UserOut
+from src.schemas.users import UserIn, UserOut, UserChangeRole
 from sqlalchemy.orm import Session
 from libgravatar import Gravatar
 from fastapi import HTTPException
@@ -15,6 +15,15 @@ class UserRepository(AbstractUserRepository):
         :type db_session: Session
         """
         self._session = db_session
+
+    async def get_first_user(self) -> UserOut:
+        """
+        Retrieve a first user from the database.
+
+        :return: A UserOut object representing the first user.
+        :rtype: UserOut
+        """
+        return self._session.query(User).first()
 
     async def get_user_by_email(self, email: str) -> UserOut:
         """
@@ -38,17 +47,37 @@ class UserRepository(AbstractUserRepository):
         :return: A UserOut object representing the created user.
         :rtype: UserOut
         """
-        avatar = None
-        try:
-            gravatar = Gravatar(new_user.email)
-            avatar = gravatar.get_image()
-        except Exception as e:
-            print(e)
-        new_user = User(**new_user.model_dump(), avatar=avatar)
+        user = await self.get_first_user()
+        if user:
+            user_role = "administrator"
+        else:
+            user_role = "standard"
+        new_user = User(**new_user.model_dump(), role=user_role)
         self._session.add(new_user)
         self._session.commit()
         self._session.refresh(new_user)
         return UserOut(**new_user.to_dict())
+
+    async def change_user_role(self, email: str, body: UserChangeRole) -> UserOut | None:
+        """
+        Retrieve a first user from the database.
+        :param email: The email of the user to retrieve.
+        :type email: str
+        :param body: The new role for the user.
+        :type body: UserChangeRole
+        :return: A UserOut object representing the retrieved user.
+        :rtype: UserOut
+        """
+        user = await self.get_user_by_email(email)
+        if user:
+            if body.role:
+                try:
+                    user.role = body.role
+                except:
+                    raise HTTPException(status_code=422, detail="You should use one of these roles: 'standard', 'moderator', 'administrator'.")
+        self._session.commit()
+        self._session.refresh(user)
+        return UserOut(**user.to_dict())
 
     async def update_token(self, user: User, token: str | None) -> None:
         """
@@ -78,25 +107,5 @@ class UserRepository(AbstractUserRepository):
             user = await self.get_user_by_email(email)
             user.confirmed = True
             self._session.commit()
-        except:
-            raise HTTPException(status_code=404, detail="User not found")
-
-    async def update_avatar(self, email, url: str) -> UserOut:
-        """
-        Update the avatar URL for a user in the repository.
-
-        :param email: The email address of the user to update.
-        :type email: str
-        :param url: The new avatar URL for the user.
-        :type url: str
-
-        :return: A UserOut object representing the updated user.
-        :rtype: UserOut
-        """
-        try:
-            user = await self.get_user_by_email(email)
-            user.avatar = url
-            self._session.commit()
-            return user
         except:
             raise HTTPException(status_code=404, detail="User not found")

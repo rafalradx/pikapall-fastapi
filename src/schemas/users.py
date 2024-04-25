@@ -1,5 +1,6 @@
 from datetime import datetime
 from pydantic import BaseModel, Field, EmailStr
+from typing import Literal
 
 
 class UserIn(BaseModel):
@@ -19,8 +20,11 @@ class UserOut(BaseModel):
     id: int
     username: str
     email: EmailStr
-    # role: ...
+    role: Literal["standard", "moderator", "administrator"]
     created_at: datetime
+
+class UserChangeRole(BaseModel):
+    role: Literal["standard", "moderator", "administrator"]
 
 class Token(BaseModel):
     """
