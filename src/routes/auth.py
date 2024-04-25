@@ -8,7 +8,7 @@ from fastapi.requests import Request
 from src.repository.abstract import AbstractUserRepository
 from dependencies import get_users_repository, get_password_handler
 
-from src.schemas.users import UserIn, UserOut, Token, RequestEmail
+from src.schemas.users import UserIn, UserOut, Token
 from src.services.auth import auth_service
 from src.services.pwd_handler import AbstractPasswordHashHandler
 from src.config import settings
@@ -99,8 +99,9 @@ async def login(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid password"
         )
     # Generate JWT
-    access_token = await auth_service.create_access_token(data={"sub": user.email})
-    refresh_token = await auth_service.create_refresh_token(data={"sub": user.email})
+    payload = {"sub": user.email, "role": user.role}
+    access_token = await auth_service.create_access_token(data=payload)
+    refresh_token = await auth_service.create_refresh_token(data=payload)
     await users_repository.update_token(user, refresh_token)
     return Token(access_token=access_token, refresh_token=refresh_token)
 
@@ -135,8 +136,8 @@ async def refresh_token(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token"
         )
-
-    access_token = await auth_service.create_access_token(data={"sub": email})
-    refresh_token = await auth_service.create_refresh_token(data={"sub": email})
+    payload = {"sub": user.email, "role": user.role}
+    access_token = await auth_service.create_access_token(data=payload)
+    refresh_token = await auth_service.create_refresh_token(data=payload)
     await users_repository.update_token(user, refresh_token)
     return Token(access_token=access_token, refresh_token=refresh_token)
