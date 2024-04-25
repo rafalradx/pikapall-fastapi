@@ -28,7 +28,6 @@ class User(Base):
     email = Column(String(100), unique=True, nullable=False)
     role = Column(Enum("standard", "moderator", "administrator"), nullable=False)
     registration_date = Column(DateTime(timezone=True), server_default=func.now())
-
     photos = relationship("Photo", back_populates="user")
 
 
