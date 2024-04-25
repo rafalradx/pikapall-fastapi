@@ -2,7 +2,7 @@ from typing import List
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
 from src.database.models import Tag, User, Photo, PhotoTag
-from src.schemas.tags import TagModel
+from src.schemas.photo import TagIn
 
 
 async def get_tags(skip: int, limit: int, user: User, db: Session) -> List[Tag]:
