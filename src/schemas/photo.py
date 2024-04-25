@@ -11,7 +11,7 @@ class TagOut(TagIn):
     id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class CommentIn(BaseModel):
@@ -26,7 +26,7 @@ class CommentOut(CommentIn):
     id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class PhotoIn(BaseModel):
@@ -52,7 +52,7 @@ class PhotoOut(PhotoIn):
     created_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class PhotoBase(BaseModel):
@@ -73,4 +73,4 @@ class PhotoOut(PhotoBase):
     image_url: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
