@@ -12,23 +12,23 @@ router = APIRouter(prefix="/tags", tags=["tags"])
 
 
 @router.get("/", response_model=List[TagOut])
-async def read_tags(
+async def read_all_tags(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    tags = await repository_tags.get_tags(skip, limit, current_user, db)
+    tags = await repository_tags.get_all_tags(skip, limit, current_user, db)
     return tags
 
 
 @router.get("/{tag_id}", response_model=TagOut)
-async def read_tag(
+async def read_tag_by_id(
     tag_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    tag = await repository_tags.get_tag(tag_id, current_user, db)
+    tag = await repository_tags.get_tag_by_id(tag_id, current_user, db)
     if tag is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Tag not found"
@@ -37,17 +37,17 @@ async def read_tag(
 
 
 @router.post("/", response_model=TagOut, status_code=status.HTTP_201_CREATED)
-async def create_tag(
+async def create_tag_route(
     body: str,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    tag = await repository_tags.create_or_get_tag(body, current_user, db)
+    tag = await repository_tags.create_tag(body, current_user, db)
     return tag
 
 
 @router.put("/{tag_id}", response_model=TagOut)
-async def update_tag(
+async def update_tag_route(
     tag_id: int,
     body: str,
     db: Session = Depends(get_db),
