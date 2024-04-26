@@ -67,6 +67,8 @@ class PhotoUpdate(BaseModel):
 #     id: int
 #     user_id: int
 #     image_url: str
-
-#     class Config:
-#         from_attributes = True
+#
+#
+#    class Config:
+#        from_attributes = True
+#

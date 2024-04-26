@@ -51,30 +51,3 @@ class AbstractUserRepository(ABC):
         :return: None
         """
         ...
-
-    @abstractmethod
-    def confirm_email(self, email: str) -> None:
-        """
-        Confirm the email address of a user in the repository.
-
-        :param email: The email address to confirm.
-        :type email: str
-
-        :return: None
-        """
-        ...
-
-    @abstractmethod
-    def update_avatar(self, email, url: str) -> UserOut:
-        """
-        Update the avatar URL for a user in the repository.
-
-        :param email: The email address of the user to update.
-        :type email: str
-        :param url: The new avatar URL for the user.
-        :type url: str
-
-        :return: A UserOut object representing the updated user.
-        :rtype: UserOut
-        """
-        ...

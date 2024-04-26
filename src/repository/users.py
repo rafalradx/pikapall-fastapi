@@ -52,13 +52,15 @@ class UserRepository(AbstractUserRepository):
             user_role = "administrator"
         else:
             user_role = "standard"
-        new_user = User(**new_user.model_dump(), role=user_role)
+        new_user = User(**new_user.model_dump())
         self._session.add(new_user)
         self._session.commit()
         self._session.refresh(new_user)
-        return UserOut(**new_user.to_dict())
+        return new_user
 
-    async def change_user_role(self, email: str, body: UserChangeRole) -> UserOut | None:
+    async def change_user_role(
+        self, email: str, body: UserChangeRole
+    ) -> UserOut | None:
         """
         Retrieve a first user from the database.
         :param email: The email of the user to retrieve.
@@ -74,10 +76,13 @@ class UserRepository(AbstractUserRepository):
                 try:
                     user.role = body.role
                 except:
-                    raise HTTPException(status_code=422, detail="You should use one of these roles: 'standard', 'moderator', 'administrator'.")
+                    raise HTTPException(
+                        status_code=422,
+                        detail="You should use one of these roles: 'standard', 'moderator', 'administrator'.",
+                    )
         self._session.commit()
         self._session.refresh(user)
-        return UserOut(**user.to_dict())
+        return user
 
     async def update_token(self, user: User, token: str | None) -> None:
         """
@@ -93,19 +98,3 @@ class UserRepository(AbstractUserRepository):
         """
         user.refresh_token = token
         self._session.commit()
-
-    async def confirm_email(self, email: str) -> None:
-        """
-        Confirm the email address of a user in the repository.
-
-        :param email: The email address to confirm.
-        :type email: str
-
-        :return: None
-        """
-        try:
-            user = await self.get_user_by_email(email)
-            user.confirmed = True
-            self._session.commit()
-        except:
-            raise HTTPException(status_code=404, detail="User not found")
