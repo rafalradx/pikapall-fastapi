@@ -6,7 +6,7 @@ from src.database.models import User
 from src.schemas.photo import TagOut
 from src.repository import tags as repository_tags
 from src.services.auth import auth_service
-from src.routes.users import get_current_user
+from src.services.auth_user import get_current_user
 
 router = APIRouter(prefix="/tags", tags=["tags"])
 
