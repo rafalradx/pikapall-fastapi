@@ -3,7 +3,7 @@ from fastapi import APIRouter, HTTPException, Depends, status
 from sqlalchemy.orm import Session
 from src.database.db import get_db
 from src.database.models import User
-from src.schemas.tags import TagResponse
+from src.schemas.photo import TagOut
 from src.repository import tags as repository_tags
 from src.services.auth import auth_service
 from src.routes.users import get_current_user
@@ -11,7 +11,7 @@ from src.routes.users import get_current_user
 router = APIRouter(prefix="/tags", tags=["tags"])
 
 
-@router.get("/", response_model=List[TagResponse])
+@router.get("/", response_model=List[TagOut])
 async def read_tags(
     skip: int = 0,
     limit: int = 100,
@@ -22,7 +22,7 @@ async def read_tags(
     return tags
 
 
-@router.get("/{tag_id}", response_model=TagResponse)
+@router.get("/{tag_id}", response_model=TagOut)
 async def read_tag(
     tag_id: int,
     db: Session = Depends(get_db),
@@ -36,7 +36,7 @@ async def read_tag(
     return tag
 
 
-@router.post("/", response_model=TagResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=TagOut, status_code=status.HTTP_201_CREATED)
 async def create_tag(
     body: str,
     db: Session = Depends(get_db),
@@ -46,7 +46,7 @@ async def create_tag(
     return tag
 
 
-@router.put("/{tag_id}", response_model=TagResponse)
+@router.put("/{tag_id}", response_model=TagOut)
 async def update_tag(
     tag_id: int,
     body: str,
@@ -61,7 +61,7 @@ async def update_tag(
     return tag
 
 
-@router.delete("/{tag_id}", response_model=TagResponse)
+@router.delete("/{tag_id}", response_model=TagOut)
 async def remove_tag(
     tag_id: int,
     db: Session = Depends(get_db),

@@ -30,12 +30,18 @@ class CommentOut(CommentIn):
 
 
 class PhotoIn(BaseModel):
+    """
+    Pydantic model representing input data for creating a photo.
+
+    """
+
     image_url: str = Field(max_length=255)
     description: str = Field(max_length=500)
     tags: List[int] | None
 
 
 class PhotoOut(PhotoIn):
+
     id: int
     image_url_transform: str = Field(max_length=255)
     user_id: int
