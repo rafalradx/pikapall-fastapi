@@ -1,16 +1,18 @@
 from datetime import datetime
 from pydantic import BaseModel, Field
+from typing import List, Optional
 
-from typing import List
 
 class TagIn(BaseModel):
     name: str = Field(max_length=25)
+
 
 class TagOut(TagIn):
     id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+
 
 class CommentIn(BaseModel):
     content: str = Field(max_length=255)
@@ -19,48 +21,46 @@ class CommentIn(BaseModel):
     created_at: datetime
     updated_at: datetime
 
+
 class CommentOut(CommentIn):
     id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+
 
 class PhotoIn(BaseModel):
-    """
-    Pydantic model representing input data for creating a photo.
-
-    """
     image_url: str = Field(max_length=255)
     description: str = Field(max_length=500)
     tags: List[int] | None
 
-class PhotoOut(PhotoIn):
-    """
-    Pydantic model representing output data for retrieving a photo.
 
-    """
+class PhotoOut(PhotoIn):
     id: int
     image_url_transform: str = Field(max_length=255)
     user_id: int
     created_at: datetime
 
     class Config:
-        orm_mode = Truefrom pydantic import BaseModel
-from typing import List, Optional
+        from_attributes = True
 
-class PhotoBase(BaseModel):
-    description: Optional[str]
 
-class PhotoCreate(PhotoBase):
-    pass
+class PhotoUpdate(BaseModel):
+    image_url_transform: str = Field(max_length=255)
+    description: str = Field(max_length=500)
+    tags: List[int] | None
 
-class PhotoUpdate(PhotoBase):
-    pass
 
-class PhotoOut(PhotoBase):
-    id: int
-    user_id: int
-    image_url: str
+# class PhotoBase(BaseModel):
+#     description: Optional[str]
 
-    class Config:
-        orm_mode = True
+# class PhotoCreate(PhotoBase):
+#     pass
+
+# class PhotoOut(PhotoBase):
+#     id: int
+#     user_id: int
+#     image_url: str
+
+#     class Config:
+#         from_attributes = True
