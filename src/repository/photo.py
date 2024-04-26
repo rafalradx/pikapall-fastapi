@@ -1,13 +1,13 @@
 from sqlalchemy.orm import Session
-from src.database.models import Photo
-from src.schemas.photo import PhotoCreate, PhotoUpdate, PhotoOut
+from src.schemas.photo import PhotoCreate, PhotoUpdate, PhotoOut, PhotoIn
+from src.database.models import User, Photo
 
 
 class PhotoRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    async def create_photo(self, photo_data: PhotoCreate, user_id: int) -> PhotoOut:
+    async def create_photo(self, photo_data: PhotoIn, user_id: int) -> PhotoOut:
         new_photo = Photo(**photo_data.dict(), user_id=user_id)
         self.db.add(new_photo)
         await self.db.commit()
