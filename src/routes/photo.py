@@ -1,19 +1,19 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from src.schemas.photo import PhotoCreate, PhotoOut
+from src.schemas.photo import PhotoIn, PhotoOut
 from src.services.photo_service import PhotoService
 from src.services.auth_user import get_current_user
 from src.database.db import get_db
 
-router = APIRouter(prefix="/photos", tags=["Photos"])
+router = APIRouter(prefix="/photos", tags=["photos"])
 
 
 @router.post(
     "/", response_model=PhotoOut, status_code=201, summary="Create a new photo"
 )
 async def create_photo(
-    photo_data: PhotoCreate,
+    photo_data: PhotoIn,
     current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -53,7 +53,7 @@ async def get_photo_by_id(photo_id: int, db: Session = Depends(get_db)):
 @router.put("/{photo_id}", response_model=PhotoOut, summary="Update a photo by ID")
 async def update_photo(
     photo_id: int,
-    photo_data: PhotoCreate,
+    photo_data: PhotoIn,
     current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
