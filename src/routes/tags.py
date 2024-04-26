@@ -37,7 +37,7 @@ async def read_tag_by_id(
 
 
 @router.post("/", response_model=TagOut, status_code=status.HTTP_201_CREATED)
-async def create_tag_route(
+async def create_tag(
     body: str,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
@@ -47,7 +47,7 @@ async def create_tag_route(
 
 
 @router.put("/{tag_id}", response_model=TagOut)
-async def update_tag_route(
+async def update_tag(
     tag_id: int,
     body: str,
     db: Session = Depends(get_db),
