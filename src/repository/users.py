@@ -2,7 +2,6 @@ from src.repository.abstract import AbstractUserRepository
 from src.database.models import User
 from src.schemas.users import UserIn, UserOut, UserChangeRole
 from sqlalchemy.orm import Session
-from libgravatar import Gravatar
 from fastapi import HTTPException
 
 
@@ -37,6 +36,18 @@ class UserRepository(AbstractUserRepository):
         """
         return self._session.query(User).filter(User.email == email).first()
 
+    async def get_user_by_id(self, user_id: int) -> UserOut:
+        """
+        Retrieve a user from the repository based on the provided id.
+
+        :param user_id: The id of the user to retrieve.
+        :type user_id: int
+
+        :return: A UserOut object representing the retrieved user.
+        :rtype: UserOut
+        """
+        return self._session.query(User).filter(User.id == user_id).first()
+
     async def create_user(self, new_user: UserIn) -> UserOut:
         """
         Create a new user in the repository with an avatar from Gravatar.
@@ -48,11 +59,13 @@ class UserRepository(AbstractUserRepository):
         :rtype: UserOut
         """
         user = await self.get_first_user()
-        if user:
+        # if users table is empty create administrator
+        if not user:
             user_role = "administrator"
         else:
             user_role = "standard"
         new_user = User(**new_user.model_dump())
+        new_user.role = user_role
         self._session.add(new_user)
         self._session.commit()
         self._session.refresh(new_user)
