@@ -1,7 +1,6 @@
 from datetime import datetime
 from enum import Enum
 from pydantic import BaseModel, Field, EmailStr
-from typing import Literal
 
 
 class RoleEnum(str, Enum):
@@ -31,12 +30,15 @@ class UserOut(BaseModel):
     id: int
     username: str
     email: EmailStr
-    role: Literal["standard", "moderator", "administrator"]
-    created_at: datetime
+    role: RoleEnum
+    registration_date: datetime
+
+    class Config:
+        from_attributes = True
 
 
 class UserChangeRole(BaseModel):
-    role: Literal["standard", "moderator", "administrator"]
+    role: RoleEnum
 
 
 class Token(BaseModel):
@@ -48,12 +50,3 @@ class Token(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str = "bearer"
-
-
-class RequestEmail(BaseModel):
-    """
-    Pydantic model representing an email for confirm email request.
-
-    """
-
-    email: EmailStr

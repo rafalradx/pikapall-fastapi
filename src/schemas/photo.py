@@ -36,6 +36,11 @@ class PhotoIn(BaseModel):
 
 
 class PhotoOut(PhotoIn):
+    """
+    Pydantic model representing output data for retrieving a photo.
+
+    """
+
     id: int
     image_url_transform: str = Field(max_length=255)
     user_id: int
@@ -45,22 +50,22 @@ class PhotoOut(PhotoIn):
         from_attributes = True
 
 
-class PhotoUpdate(BaseModel):
-    image_url_transform: str = Field(max_length=255)
-    description: str = Field(max_length=500)
-    tags: List[int] | None
+class PhotoBase(BaseModel):
+    description: Optional[str]
 
 
-# class PhotoBase(BaseModel):
-#     description: Optional[str]
+class PhotoCreate(PhotoBase):
+    pass
 
-# class PhotoCreate(PhotoBase):
-#     pass
 
-# class PhotoOut(PhotoBase):
-#     id: int
-#     user_id: int
-#     image_url: str
+class PhotoUpdate(PhotoBase):
+    pass
 
-#     class Config:
-#         from_attributes = True
+
+class PhotoOut(PhotoBase):
+    id: int
+    user_id: int
+    image_url: str
+
+    class Config:
+        from_attributes = True

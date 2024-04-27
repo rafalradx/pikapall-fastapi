@@ -1,12 +1,13 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-from src.routes import auth, tags
+from src.routes import auth, tags, photo, users
 import os
 from pathlib import Path
 from dependencies import get_redis_client
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_limiter import FastAPILimiter
+import uvicorn
 
 app = FastAPI()
 app.mount(
@@ -16,8 +17,8 @@ app.mount(
 
 app.include_router(auth.router, prefix="/api")
 app.include_router(tags.router, prefix="/api")
-# app.include_router(contacts.router, prefix="/api")
-# app.include_router(users.router, prefix="/api")
+app.include_router(photo.router, prefix="/api")
+app.include_router(users.router, prefix="/api")
 
 origins = ["http://localhost:3000"]
 
@@ -64,3 +65,7 @@ async def favicon():
         path=file_path,
         headers={"Content-Disposition": "attachment; filename=" + file_name},
     )
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)

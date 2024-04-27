@@ -1,20 +1,21 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import List
 
-from src.schemas.photo import PhotoCreate, PhotoOut
+from src.schemas.photo import PhotoIn, PhotoOut
 from src.services.photo_service import PhotoService
-from src.services.auth import get_current_user
+from src.services.auth_user import get_current_user
 from src.database.db import get_db
 
-router = APIRouter(prefix="/photos", tags=["Photos"])
+router = APIRouter(prefix="/photos", tags=["photos"])
 
 
-@router.post("/", response_model=PhotoOut, status_code=201, summary="Create a new photo")
+@router.post(
+    "/", response_model=PhotoOut, status_code=201, summary="Create a new photo"
+)
 async def create_photo(
-    photo_data: PhotoCreate,
+    photo_data: PhotoIn,
     current_user: dict = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """
     Create a new photo.
@@ -27,7 +28,7 @@ async def create_photo(
     return new_photo
 
 
-@router.get("/", response_model=List[PhotoOut], summary="Get all photos")
+@router.get("/", response_model=list[PhotoOut], summary="Get all photos")
 async def get_all_photos(db: Session = Depends(get_db)):
     """
     Get all photos.
@@ -52,9 +53,9 @@ async def get_photo_by_id(photo_id: int, db: Session = Depends(get_db)):
 @router.put("/{photo_id}", response_model=PhotoOut, summary="Update a photo by ID")
 async def update_photo(
     photo_id: int,
-    photo_data: PhotoCreate,
+    photo_data: PhotoIn,
     current_user: dict = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """
     Update a photo by ID.
@@ -63,7 +64,9 @@ async def update_photo(
         raise HTTPException(status_code=401, detail="Unauthorized")
 
     photo_service = PhotoService(db)
-    updated_photo = await photo_service.update_photo(photo_id, photo_data, current_user["user_id"])
+    updated_photo = await photo_service.update_photo(
+        photo_id, photo_data, current_user["user_id"]
+    )
     if not updated_photo:
         raise HTTPException(status_code=404, detail="Photo not found")
     return updated_photo
@@ -73,7 +76,7 @@ async def update_photo(
 async def delete_photo(
     photo_id: int,
     current_user: dict = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """
     Delete a photo by ID.

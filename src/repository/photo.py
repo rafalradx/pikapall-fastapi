@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
-from src.schemas.photo import PhotoCreate, PhotoUpdate, PhotoOut, PhotoIn
-from src.database.models import User, Photo
+from src.database.models import Photo
+from src.schemas.photo import PhotoIn, PhotoUpdate, PhotoOut
 
 
 class PhotoRepository:

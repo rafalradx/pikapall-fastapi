@@ -2,9 +2,11 @@ from sqlalchemy.orm import Session
 from typing import Optional, List
 from datetime import datetime
 from src.database.models import Photo
-from src.schemas.photo import PhotoCreate, PhotoUpdate
-from src.services.auth import get_current_user
-from src.services.cloudinary import upload_image_to_cloudinary
+from src.schemas.photo import PhotoIn, PhotoUpdate
+from src.services.auth_user import get_current_user
+
+# from src.services.cloudinary import upload_image_to_cloudinary
+
 
 class PhotoService:
     def __init__(self, db: Session):
@@ -16,14 +18,14 @@ class PhotoService:
         """
         return self.db.query(Photo).filter(Photo.id == photo_id).first()
 
-    def create_photo(self, photo_data: PhotoCreate, current_user_id: int) -> Photo:
+    def create_photo(self, photo_data: PhotoIn, current_user_id: int) -> Photo:
         """
         Dodaj nowe zdjęcie na podstawie danych przekazanych przez użytkownika.
         """
         new_photo = Photo(
             user_id=current_user_id,
             description=photo_data.description,
-            created_at=datetime.now()
+            created_at=datetime.now(),
         )
         self.db.add(new_photo)
         self.db.commit()
