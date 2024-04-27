@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from src.schemas.users import UserIn, UserOut
+from src.schemas.users import UserIn, UserOut, UserChangeRole
 
 
 class AbstractUserRepository(ABC):
@@ -18,6 +18,35 @@ class AbstractUserRepository(ABC):
 
         :param email: The email of the user to retrieve.
         :type email: str
+
+        :return: A UserOut object representing the retrieved user.
+        :rtype: UserOut
+        """
+        ...
+
+    @abstractmethod
+    def change_user_role(self, email: str, role: UserChangeRole) -> UserOut:
+        """
+        Change role of a user identified by email
+
+        :param email: The email of the user subjected to role change.
+        :type email: str
+
+        :param role: Model describing new role
+        :type role: UserChangedRole
+
+        :return: A UserOut object representing the retrieved user.
+        :rtype: UserOut
+        """
+        ...
+
+    @abstractmethod
+    def get_user_by_id(self, id: int) -> UserOut:
+        """
+        Retrieve a user from the repository based on the provided id.
+
+        :param id: The id of the user to retrieve.
+        :type id: int
 
         :return: A UserOut object representing the retrieved user.
         :rtype: UserOut

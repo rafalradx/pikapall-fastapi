@@ -109,6 +109,23 @@ async def login(
     return Token(access_token=access_token, refresh_token=refresh_token)
 
 
+@router.get("/promote/{user_id}")
+async def promote_user(
+    user_id: int,
+    current_user: UserOut = Depends(get_current_user),
+    users_repository: AbstractUserRepository = Depends(get_users_repository),
+) -> UserOut:
+    if not current_user.role == "administrator":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Only admin can do that"
+        )
+    user = await users_repository.get_user_by_id(user_id)
+    user_changed = users_repository.change_user_role(
+        email=user.email, body={"role": "moderator"}
+    )
+    return user_changed
+
+
 @router.get("/refresh_token")
 async def refresh_token(
     credentials: HTTPAuthorizationCredentials = Security(security),
