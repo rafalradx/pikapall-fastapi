@@ -5,13 +5,6 @@ from src.database.models import Tag, User, Photo
 from src.schemas.photo import TagIn
 
 
-# tagi w aplikacji sa globalne, nie należa do usera
-# według mnie nie potrzebujemy takich zapytan do bazy
-# PhotoTag to jest ta pomocnicza tabela do relacji many-to-many,
-# raczej nie powinnismy z niej korzystac bezposrednio
-
-# tu bym po prostu zwracał wszystkie tagi
-
 async def get_all_tags(skip: int, limit: int, db: Session) -> List[Tag]:
     """
     Retrieve all tags.
@@ -24,7 +17,6 @@ async def get_all_tags(skip: int, limit: int, db: Session) -> List[Tag]:
     return db.query(Tag).offset(skip).limit(limit).all()
 
 
-# tu bym zwracał wybrany tag za pomoca id
 async def get_tag_by_id(tag_id: int, db: Session) -> Tag:
     """
     Retrieve a tag by its ID.
@@ -36,7 +28,6 @@ async def get_tag_by_id(tag_id: int, db: Session) -> Tag:
     return db.query(Tag).filter(Tag.id == tag_id).first()
 
 
-# tylko create tag
 async def create_tag(tag_name: str, db: Session) -> Tag:
     """
     Create a new tag.
@@ -52,8 +43,6 @@ async def create_tag(tag_name: str, db: Session) -> Tag:
         db.commit()
         db.refresh(tag)
     return tag
-
-# update tag po id bez usera
 
 
 async def update_tag(tag_id: int, new_tag_name: str, db: Session) -> Tag:
