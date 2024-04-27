@@ -2,6 +2,8 @@ from sqlalchemy.orm import sessionmaker
 from src.database.db import get_db
 from models import Photo
 import cloudinary.uploader
+from src.config import settings
+
 
 def get_db_session():
     db = next(get_db())
@@ -12,9 +14,9 @@ def get_db_session():
 
 
 cloudinary.config(
-    cloud_name="dw2vmfsxz",
-    api_key="333118877835416",
-    api_secret="GVQy6jdSYNddodEbjl6lcmWEtOA"
+    cloud_name=settings.cloudinary_name,
+    api_key=settings.cloudinary_api_key,
+    api_secret=settings.cloudinary_api_secret
 )
 
 

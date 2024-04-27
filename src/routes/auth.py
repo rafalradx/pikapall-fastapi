@@ -8,10 +8,10 @@ from fastapi.requests import Request
 from src.repository.abstract import AbstractUserRepository
 from dependencies import get_users_repository, get_password_handler
 
-from src.schemas.users import UserIn, UserOut, Token, RequestEmail
+from src.schemas.users import UserIn, UserOut, Token
 from src.services.auth import auth_service
+from src.services.auth_user import get_current_user
 from src.services.pwd_handler import AbstractPasswordHashHandler
-from src.config import settings
 
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -23,6 +23,7 @@ async def signup(
     new_user: UserIn,
     background_tasks: BackgroundTasks,
     request: Request,
+    # current_user: UserOut = Depends(get_current_user),
     users_repository: AbstractUserRepository = Depends(get_users_repository),
     pwd_handler: AbstractPasswordHashHandler = Depends(get_password_handler),
 ) -> UserOut:
@@ -49,6 +50,8 @@ async def signup(
 
     :raises HTTPException 409: If the account already exists.
     """
+    # print(current_user.role)
+
     exist_user = await users_repository.get_user_by_email(new_user.email)
     if exist_user:
         raise HTTPException(
@@ -99,8 +102,9 @@ async def login(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid password"
         )
     # Generate JWT
-    access_token = await auth_service.create_access_token(data={"sub": user.email})
-    refresh_token = await auth_service.create_refresh_token(data={"sub": user.email})
+    payload = {"sub": user.email}
+    access_token = await auth_service.create_access_token(data=payload)
+    refresh_token = await auth_service.create_refresh_token(data=payload)
     await users_repository.update_token(user, refresh_token)
     return Token(access_token=access_token, refresh_token=refresh_token)
 
@@ -135,8 +139,8 @@ async def refresh_token(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token"
         )
-
-    access_token = await auth_service.create_access_token(data={"sub": email})
-    refresh_token = await auth_service.create_refresh_token(data={"sub": email})
+    payload = {"sub": user.email}
+    access_token = await auth_service.create_access_token(data=payload)
+    refresh_token = await auth_service.create_refresh_token(data=payload)
     await users_repository.update_token(user, refresh_token)
     return Token(access_token=access_token, refresh_token=refresh_token)

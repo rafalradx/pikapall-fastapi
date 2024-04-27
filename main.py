@@ -1,13 +1,17 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-from src.routes import auth, tags
+from src.routes import auth, tags, photo, users
 import os
 from pathlib import Path
 from dependencies import get_redis_client
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_limiter import FastAPILimiter
+<<<<<<< HEAD
 from src.repository.cloudinary_tr import apply_transformation 
+=======
+import uvicorn
+>>>>>>> ace5f721a994fac01726a5d5a8d720d7f1d42078
 
 app = FastAPI()
 app.mount(
@@ -17,8 +21,8 @@ app.mount(
 
 app.include_router(auth.router, prefix="/api")
 app.include_router(tags.router, prefix="/api")
-# app.include_router(contacts.router, prefix="/api")
-# app.include_router(users.router, prefix="/api")
+app.include_router(photo.router, prefix="/api")
+app.include_router(users.router, prefix="/api")
 
 origins = ["http://localhost:3000"]
 
@@ -66,6 +70,7 @@ async def favicon():
         headers={"Content-Disposition": "attachment; filename=" + file_name},
     )
 
+<<<<<<< HEAD
 @app.get("/apply_transformation")  
 async def apply_transformation_endpoint(photo_id: int, transformation_choice: int):
     if transformation_choice == 1:
@@ -87,3 +92,8 @@ async def apply_transformation_endpoint(photo_id: int, transformation_choice: in
             return {"message": "Zdjęcie po zastosowaniu transformacji:", "transformed_url": transformed_url}
         else:
             return {"message": "Nie znaleziono zdjęcia o podanym ID."}
+=======
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+>>>>>>> ace5f721a994fac01726a5d5a8d720d7f1d42078
