@@ -3,7 +3,7 @@ from fastapi import APIRouter, HTTPException, Depends, status
 from sqlalchemy.orm import Session
 from src.database.db import get_db
 from src.database.models import User
-from src.schemas.photo import TagOut
+from src.schemas.photo import TagOut, TagIn
 from src.repository import tags as repository_tags
 from src.services.auth import auth_service
 from src.services.auth_user import get_current_user
@@ -18,7 +18,7 @@ async def read_all_tags(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    tags = await repository_tags.get_all_tags(skip, limit, current_user, db)
+    tags = await repository_tags.get_all_tags(skip, limit, db)
     return tags
 
 
@@ -28,7 +28,7 @@ async def read_tag_by_id(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    tag = await repository_tags.get_tag_by_id(tag_id, current_user, db)
+    tag = await repository_tags.get_tag_by_id(tag_id, db)
     if tag is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Tag not found"
@@ -38,11 +38,11 @@ async def read_tag_by_id(
 
 @router.post("/", response_model=TagOut, status_code=status.HTTP_201_CREATED)
 async def create_tag(
-    body: str,
+    body: TagIn,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    tag = await repository_tags.create_tag(body, current_user, db)
+    tag = await repository_tags.create_tag(body.name, db)
     return tag
 
 
@@ -53,7 +53,7 @@ async def update_tag(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    tag = await repository_tags.update_tag(tag_id, body, current_user, db)
+    tag = await repository_tags.update_tag(tag_id, body, db)
     if tag is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Tag not found"
@@ -67,9 +67,10 @@ async def remove_tag(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    tag = await repository_tags.delete_tag(tag_id, current_user, db)
-    if tag is None:
+    if tag_id is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Tag not found"
         )
+    tag = await repository_tags.delete_tag(tag_id, db)
+
     return tag
