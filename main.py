@@ -7,11 +7,9 @@ from pathlib import Path
 from dependencies import get_redis_client
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_limiter import FastAPILimiter
-<<<<<<< HEAD
 from src.repository.cloudinary_tr import apply_transformation 
-=======
 import uvicorn
->>>>>>> ace5f721a994fac01726a5d5a8d720d7f1d42078
+
 
 app = FastAPI()
 app.mount(
@@ -70,7 +68,7 @@ async def favicon():
         headers={"Content-Disposition": "attachment; filename=" + file_name},
     )
 
-<<<<<<< HEAD
+
 @app.get("/apply_transformation")  
 async def apply_transformation_endpoint(photo_id: int, transformation_choice: int):
     if transformation_choice == 1:
@@ -92,8 +90,8 @@ async def apply_transformation_endpoint(photo_id: int, transformation_choice: in
             return {"message": "Zdjęcie po zastosowaniu transformacji:", "transformed_url": transformed_url}
         else:
             return {"message": "Nie znaleziono zdjęcia o podanym ID."}
-=======
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
->>>>>>> ace5f721a994fac01726a5d5a8d720d7f1d42078
+

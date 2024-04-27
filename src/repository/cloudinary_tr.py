@@ -1,6 +1,6 @@
 from sqlalchemy.orm import sessionmaker
 from src.database.db import get_db
-from models import Photo
+from src.database.models import Photo
 import cloudinary.uploader
 from src.config import settings
 
