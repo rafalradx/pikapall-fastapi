@@ -50,22 +50,7 @@ class PhotoOut(PhotoIn):
         from_attributes = True
 
 
-class PhotoBase(BaseModel):
-    description: Optional[str]
-
-
-class PhotoCreate(PhotoBase):
-    pass
-
-
-class PhotoUpdate(PhotoBase):
-    pass
-
-
-class PhotoOut(PhotoBase):
-    id: int
-    user_id: int
-    image_url: str
-
-    class Config:
-        from_attributes = True
+class PhotoUpdate(BaseModel):
+    image_url_transform: str = Field(max_length=255)
+    description: str = Field(max_length=500)
+    tags: List[int] | None
