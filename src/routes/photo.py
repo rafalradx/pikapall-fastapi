@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from typing import List
 
 from src.schemas.photo import PhotoIn, PhotoOut
 from src.services.photo_service import PhotoService
