@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
 from src.database.models import Tag, User, Photo
@@ -72,14 +72,17 @@ async def update_tag(tag_id: int, new_tag_name: str, db: Session) -> Tag:
     return tag
 
 
-async def delete_tag(tag_id: int, db: Session) -> None:
+async def delete_tag(tag_id: int, db: Session) -> Optional[Tag]:
     """
     Delete a tag.
 
     :param tag_id: The ID of the tag to delete.
     :param db: The database session.
+    :return: The deleted Tag object, or None if the tag was not found.
     """
     tag = db.query(Tag).filter(Tag.id == tag_id).first()
     if tag:
         db.delete(tag)
         db.commit()
+        return tag
+    return None

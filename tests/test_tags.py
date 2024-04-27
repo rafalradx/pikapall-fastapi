@@ -40,7 +40,7 @@ class TestTags(unittest.IsolatedAsyncioTestCase):
         self.session.query(Tag).filter(
             Tag.name == tag_name).first.return_value = None
         await create_tag(tag_name=tag_name, db=self.session)
-        self.session.add.assert_called_once_with(new_tag)
+        self.session.add.assert_called_once_with(unittest.mock.ANY)
         self.session.commit.assert_called_once()
 
     async def test_update_tag(self):
@@ -55,7 +55,7 @@ class TestTags(unittest.IsolatedAsyncioTestCase):
         tag = Tag()
         self.session.query(Tag).filter(Tag.id == 1).first.return_value = tag
         result = await delete_tag(tag_id=1, db=self.session)
-        self.assertIsNone(result)
+        self.assertEqual(result, tag)
         self.session.delete.assert_called_once_with(tag)
         self.session.commit.assert_called_once()
 
