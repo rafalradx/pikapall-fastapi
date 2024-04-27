@@ -51,7 +51,9 @@ async def add_admin_user_cli():
         help="Username of the user (minimum 5 characters)",
         required=True,
     )
-    parser.add_argument("-e", "--email", type=str, help="Email address of the user")
+    parser.add_argument(
+        "-e", "--email", type=str, required=True, help="Email address of the user"
+    )
     parser.add_argument(
         "-p",
         "--password",
@@ -60,7 +62,12 @@ async def add_admin_user_cli():
         required=True,
     )
     parser.add_argument(
-        "-r", "--role", type=RoleEnum, choices=list(RoleEnum), help="Users role"
+        "-r",
+        "--role",
+        type=RoleEnum,
+        choices=[d.value for d in RoleEnum],
+        required=True,
+        help="Users role",
     )
     args = parser.parse_args()
 
