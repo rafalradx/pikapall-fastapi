@@ -112,6 +112,7 @@ async def delete_photo(
     return deleted_photo
 
 
+
 @router.get("/search/", response_model=List[PhotoOut], summary="Search photos by tag")
 async def search_photos_by_tag(
     tag: str = Query(..., description="Tag to search for"),
@@ -149,3 +150,21 @@ async def filter_photos(
     photo_repo = PhotoRepository(db)
     photos = await photo_repo.filter_photos(tag, min_rating, start_date, end_date)
     return photos
+
+@router.post(
+    "/{photo_id}/transform", response_model=PhotoOut,
+    summary="Apply transformation to a photo by ID",
+)
+async def transform_photo(
+    photo_id: int,
+    db: Session = Depends(get_db),
+):
+    """
+    Apply transformation to a photo by ID.
+    """
+    transformed_url = apply_transformation_endpoint(photo_id)
+    if transformed_url:
+        return {"message": "Zdjęcie po zastosowaniu transformacji:", "transformed_url": transformed_url}
+    else:
+        raise HTTPException(status_code=404, detail="Nie znaleziono zdjęcia o podanym ID.")
+

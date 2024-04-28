@@ -7,7 +7,9 @@ from pathlib import Path
 from dependencies import get_redis_client
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_limiter import FastAPILimiter
+from src.repository.cloudinary_tr import apply_transformation 
 import uvicorn
+
 
 app = FastAPI()
 app.mount(
@@ -69,3 +71,4 @@ async def favicon():
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
