@@ -8,7 +8,7 @@ from src.schemas.photo import CommentOut
 
 from src.services.auth_user import get_current_user
 
-router = APIRouter()
+router = APIRouter(prefix="/comments", tags=["comments"])
 
 
 @router.post("/comments/", status_code=201)
@@ -20,7 +20,8 @@ async def create_comment(
     current_user: UserOut = Depends(get_current_user),
 ):
     if current_user.role == RoleEnum.user:
-        raise HTTPException(status_code=403, detail="Only admins and mods can create comments")
+        raise HTTPException(
+            status_code=403, detail="Only admins and mods can create comments")
     return await comments.create_comment(db, photo_id, user_id, content)
 
 
@@ -33,10 +34,12 @@ async def update_comment(
     current_user: UserOut = Depends(get_current_user),
 ):
     if current_user.role == RoleEnum.user:
-        raise HTTPException(status_code=403, detail="komentarze usuwa tylko admin lub moderator")
+        raise HTTPException(
+            status_code=403, detail="komentarze usuwa tylko admin lub moderator")
     updated_comment = await comments.update_comment(db, comment_id, user_id, new_content)
     if not updated_comment:
-        raise HTTPException(status_code=404, detail="nie znaleziono komentarza")
+        raise HTTPException(
+            status_code=404, detail="nie znaleziono komentarza")
     return updated_comment
 
 
@@ -48,9 +51,11 @@ async def delete_comment(
     current_user: dict = Depends(get_current_user),
 ):
     if current_user not in [RoleEnum.admin, RoleEnum.mod]:
-        raise HTTPException(status_code=403, detail="Komentarze usuwa tylko admin lub moderator")
+        raise HTTPException(
+            status_code=403, detail="Komentarze usuwa tylko admin lub moderator")
     if not await comments.delete_comment(db, comment_id, user_role):
-        raise HTTPException(status_code=404, detail="Nie znaleziono komentarza")
+        raise HTTPException(
+            status_code=404, detail="Nie znaleziono komentarza")
 
 
 @router.get("/comments/{photo_id}/", response_model=list[CommentOut], status_code=200)
