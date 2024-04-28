@@ -1,9 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
-from typing import List
-
 from src.schemas.photo import PhotoIn, PhotoOut
-from src.database.db import get_db
 from dependencies import get_photos_repository, PhotoRepository
 from src.schemas.users import UserOut
 from src.services.auth_user import get_current_user
@@ -35,7 +31,7 @@ async def create_photo(
     return new_photo
 
 
-@router.get("/", response_model=List[PhotoOut], summary="Get all photos")
+@router.get("/", response_model=list[PhotoOut], summary="Get all photos")
 async def get_all_photos(
     photos_repository: PhotoRepository = Depends(get_photos_repository),
 ):
@@ -116,7 +112,7 @@ async def delete_photo(
     return deleted_photo
 
 
-@router.get("/search/", response_model=List[PhotoOut], summary="Search photos by tag")
+@router.get("/search/", response_model=list[PhotoOut], summary="Search photos by tag")
 async def search_photos_by_tag(
     tag: str = Query(..., description="Tag to search for"),
     photos_repository: PhotoRepository = Depends(get_photos_repository),
@@ -133,7 +129,7 @@ async def search_photos_by_tag(
 
 
 @router.get(
-    "/filter/", response_model=List[PhotoOut], summary="Filter photos by criteria"
+    "/filter/", response_model=list[PhotoOut], summary="Filter photos by criteria"
 )
 async def filter_photos(
     tag: str = None,
