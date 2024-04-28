@@ -44,7 +44,7 @@ async def get_all_photos(db: Session = Depends(get_db)):
     :return: List of all photos.
     """
     photo_repo = PhotoRepository(db)
-    photos = photo_repo.get_all_photos()
+    photos = await photo_repo.get_all_photos()
     return photos
 
 
