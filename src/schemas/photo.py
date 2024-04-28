@@ -53,4 +53,4 @@ class PhotoOut(PhotoIn):
 class PhotoUpdate(BaseModel):
     image_url_transform: str = Field(max_length=255)
     description: str = Field(max_length=500)
-    tags: List[int] | None
+    tags: List[str] | None
