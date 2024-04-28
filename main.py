@@ -17,8 +17,8 @@ app.mount(
 
 
 app.include_router(auth.router, prefix="/api")
-app.include_router(tags.router, prefix="/api")
 app.include_router(photo.router, prefix="/api")
+app.include_router(tags.router, prefix="/api")
 app.include_router(comments.router, prefix="/api")
 app.include_router(users.router, prefix="/api")
 
