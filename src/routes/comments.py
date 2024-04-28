@@ -4,7 +4,7 @@ from datetime import datetime
 from src.repository import comments
 from src.database import SessionLocal
 from src.schemas.user import RoleEnum
-from src.dependencies import get_current_user
+from src.services.auth_user import get_current_user
 
 router = APIRouter()
 
