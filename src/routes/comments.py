@@ -15,9 +15,9 @@ async def create_comment(
     user_id: int,
     content: str,
     db: Session = Depends(SessionLocal),
-    current_user: RoleEnum = Depends(get_current_user),
+    current_user: UserOut = Depends(get_current_user),
 ):
-    if current_user == RoleEnum.user:
+    if current_user.role == RoleEnum.user:
         raise HTTPException(status_code=403, detail="Only admins and mods can create comments")
     return await comments.create_comment(db, photo_id, user_id, content)
 
@@ -28,9 +28,9 @@ async def update_comment(
     user_id: int,
     new_content: str,
     db: Session = Depends(SessionLocal),
-    current_user: RoleEnum = Depends(get_current_user),
+    current_user: UserOut = Depends(get_current_user),
 ):
-    if current_user == RoleEnum.user:
+    if current_user.role == RoleEnum.user:
         raise HTTPException(status_code=403, detail="komentarze usuwa tylko admin lub moderator")
     updated_comment = await comments.update_comment(db, comment_id, user_id, new_content)
     if not updated_comment:
@@ -43,7 +43,7 @@ async def delete_comment(
     comment_id: int,
     user_role: RoleEnum,
     db: Session = Depends(SessionLocal),
-    current_user: RoleEnum = Depends(get_current_user),
+    current_user: UserOut = Depends(get_current_user),
 ):
     if current_user not in [RoleEnum.admin, RoleEnum.mod]:
         raise HTTPException(status_code=403, detail="komentarze usuwa tylko admin lub moderator")
