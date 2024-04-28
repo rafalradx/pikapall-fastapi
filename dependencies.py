@@ -3,6 +3,7 @@ from src.services.pwd_handler import AbstractPasswordHashHandler, BcryptPassword
 from src.database.db import SessionLocal
 from src.repository.users import UserRepository
 from src.repository.photos import PhotoRepository
+from src.repository.tags import TagRepository
 from src.config import settings
 from redis.asyncio import Redis
 
@@ -13,6 +14,10 @@ def get_users_repository() -> AbstractUserRepository:
 
 def get_photos_repository() -> PhotoRepository:
     return PhotoRepository(SessionLocal())
+
+
+def get_tags_repository() -> TagRepository:
+    return TagRepository(SessionLocal())
 
 
 def get_password_handler() -> AbstractPasswordHashHandler:

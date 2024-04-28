@@ -1,34 +1,31 @@
-from typing import List
 from fastapi import APIRouter, HTTPException, Depends, status
-from sqlalchemy.orm import Session
-from src.database.db import get_db
-from src.database.models import User
+from src.schemas.users import UserOut
 from src.schemas.photo import TagOut, TagIn
-from src.repository import tags as repository_tags
-from src.services.auth import auth_service
 from src.services.auth_user import get_current_user
+from src.repository.tags import TagRepository
+from dependencies import get_tags_repository
 
 router = APIRouter(prefix="/tags", tags=["tags"])
 
 
-@router.get("/", response_model=List[TagOut])
+@router.get("/", response_model=list[TagOut])
 async def read_all_tags(
     skip: int = 0,
     limit: int = 100,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    tags_repository: TagRepository = Depends(get_tags_repository),
+    current_user: UserOut = Depends(get_current_user),
 ):
-    tags = await repository_tags.get_all_tags(skip, limit, db)
+    tags = await tags_repository.get_all_tags(skip, limit)
     return tags
 
 
 @router.get("/id/{tag_id}", response_model=TagOut)
 async def read_tag_by_id(
     tag_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    tags_repository: TagRepository = Depends(get_tags_repository),
+    current_user: UserOut = Depends(get_current_user),
 ):
-    tag = await repository_tags.get_tag_by_id(tag_id, db)
+    tag = await tags_repository.get_tag_by_id(tag_id)
     if tag is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Tag not found"
@@ -39,22 +36,22 @@ async def read_tag_by_id(
 @router.get("/name/{tag_name}", response_model=TagOut)
 async def read_tag_by_name(
     tag_name: str,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    tags_repository: TagRepository = Depends(get_tags_repository),
+    current_user: UserOut = Depends(get_current_user),
 ):
-    tag = await repository_tags.get_tag_by_name(tag_name, db)
+    tag = await tags_repository.get_tag_by_name(tag_name)
     if tag is None:
-        tag = await repository_tags.create_tag(tag_name, db)
+        tag = await tags_repository.create_tag(tag_name)
     return tag
 
 
 @router.post("/", response_model=TagOut, status_code=status.HTTP_201_CREATED)
 async def create_tag(
     body: TagIn,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    tags_repository: TagRepository = Depends(get_tags_repository),
+    current_user: UserOut = Depends(get_current_user),
 ):
-    tag = await repository_tags.create_tag(body.name, db)
+    tag = await tags_repository.create_tag(body.name)
     return tag
 
 
@@ -62,10 +59,10 @@ async def create_tag(
 async def update_tag(
     tag_id: int,
     body: str,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    tags_repository: TagRepository = Depends(get_tags_repository),
+    current_user: UserOut = Depends(get_current_user),
 ):
-    tag = await repository_tags.update_tag(tag_id, body, db)
+    tag = await tags_repository.update_tag(tag_id, body)
     if tag is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Tag not found"
@@ -76,13 +73,13 @@ async def update_tag(
 @router.delete("/{tag_id}", response_model=TagOut)
 async def remove_tag(
     tag_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    tags_repository: TagRepository = Depends(get_tags_repository),
+    current_user: UserOut = Depends(get_current_user),
 ):
     if tag_id is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Tag not found"
         )
-    tag = await repository_tags.delete_tag(tag_id, db)
+    tag = await tags_repository.delete_tag(tag_id)
 
     return tag
