@@ -27,6 +27,15 @@ async def get_tag_by_id(tag_id: int, db: Session) -> Tag:
     """
     return db.query(Tag).filter(Tag.id == tag_id).first()
 
+async def get_tag_by_name(tag_name: str, db: Session) -> Tag:
+    """
+    Retrieve a tag by its name.
+
+    :param tag_name: The name of the tag to retrieve.
+    :param db: The database session.
+    :return: The Tag object with the specified name.
+    """
+    return db.query(Tag).filter(Tag.name == tag_name).first()
 
 async def create_tag(tag_name: str, db: Session) -> Tag:
     """

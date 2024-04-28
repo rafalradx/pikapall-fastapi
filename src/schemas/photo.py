@@ -32,7 +32,7 @@ class CommentOut(CommentIn):
 class PhotoIn(BaseModel):
     image_url: str = Field(max_length=255)
     description: str = Field(max_length=500)
-    tags: List[int] | None
+    tags: List[str] | None
 
 
 class PhotoOut(PhotoIn):
