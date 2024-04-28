@@ -5,6 +5,7 @@ from typing import List
 from src.schemas.photo import PhotoIn, PhotoOut
 from src.services.photo_service import PhotoService
 from src.services.auth_user import get_current_user
+from src.services.cloudinary_tr import apply_transformation_endpoint
 from src.database.db import get_db
 
 router = APIRouter(prefix="/photos", tags=["photos"])
@@ -90,3 +91,21 @@ async def delete_photo(
     if not deleted_photo:
         raise HTTPException(status_code=404, detail="Photo not found")
     return deleted_photo
+
+
+@router.post(
+    "/{photo_id}/transform", response_model=PhotoOut,
+    summary="Apply transformation to a photo by ID",
+)
+async def transform_photo(
+    photo_id: int,
+    db: Session = Depends(get_db),
+):
+    """
+    Apply transformation to a photo by ID.
+    """
+    transformed_url = apply_transformation_endpoint(photo_id)
+    if transformed_url:
+        return {"message": "Zdjęcie po zastosowaniu transformacji:", "transformed_url": transformed_url}
+    else:
+        raise HTTPException(status_code=404, detail="Nie znaleziono zdjęcia o podanym ID.")

@@ -40,7 +40,6 @@ class PhotoIn(BaseModel):
             raise ValueError("Number of tags cannot exceed 5")
         return tags
 
-
 class PhotoOut(PhotoIn):
     """
     Pydantic model representing output data for retrieving a photo.
@@ -60,3 +59,23 @@ class PhotoUpdate(BaseModel):
     image_url_transform: str = Field(max_length=255)
     description: str = Field(max_length=500)
     tags: List[str] | None
+
+class TransformationInput(BaseModel):
+    width: int
+    height: int
+    crop: str
+    effect: str
+    angle: int
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "width": 100,
+                "height": 150,
+                "crop": "fill",
+                "effect": "sepia",
+                "angle": 45
+            }
+        }
+
+
