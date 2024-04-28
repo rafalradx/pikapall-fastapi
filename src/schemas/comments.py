@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from typing import List
 from datetime import datetime
-from .user import RoleEnum
+from src.schemas.users import RoleEnum
 
 
 class CommentBase(BaseModel):

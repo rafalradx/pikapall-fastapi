@@ -4,6 +4,10 @@ from datetime import datetime
 from src.repository import comments
 from src.database import SessionLocal
 from src.schemas.user import RoleEnum
+from src.database.db import get_db
+from src.schemas.users import RoleEnum, UserOut
+from src.schemas.photo import CommentOut
+
 from src.services.auth_user import get_current_user
 
 router = APIRouter()
@@ -14,7 +18,7 @@ async def create_comment(
     photo_id: int,
     user_id: int,
     content: str,
-    db: Session = Depends(SessionLocal),
+    db: Session = Depends(get_db),
     current_user: UserOut = Depends(get_current_user),
 ):
     if current_user.role == RoleEnum.user:
@@ -27,7 +31,7 @@ async def update_comment(
     comment_id: int,
     user_id: int,
     new_content: str,
-    db: Session = Depends(SessionLocal),
+    db: Session = Depends(get_db),
     current_user: UserOut = Depends(get_current_user),
 ):
     if current_user.role == RoleEnum.user:
@@ -42,18 +46,18 @@ async def update_comment(
 async def delete_comment(
     comment_id: int,
     user_role: RoleEnum,
-    db: Session = Depends(SessionLocal),
-    current_user: UserOut = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
 ):
     if current_user not in [RoleEnum.admin, RoleEnum.mod]:
-        raise HTTPException(status_code=403, detail="komentarze usuwa tylko admin lub moderator")
+        raise HTTPException(status_code=403, detail="Komentarze usuwa tylko admin lub moderator")
     if not await comments.delete_comment(db, comment_id, user_role):
-        raise HTTPException(status_code=404, detail="nie znaleziono komentarza")
+        raise HTTPException(status_code=404, detail="Nie znaleziono komentarza")
 
 
 @router.get("/comments/{photo_id}/", response_model=list[CommentOut], status_code=200)
 async def get_comments_for_photo(
     photo_id: int,
-    db: Session = Depends(SessionLocal)
+    db: Session = Depends(get_db)
 ):
     return await comments.get_comments_for_photo(db, photo_id)

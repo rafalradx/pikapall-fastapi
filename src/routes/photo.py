@@ -6,10 +6,14 @@ from src.schemas.photo import PhotoIn, PhotoOut
 from src.database.db import get_db
 from src.repository.photo import PhotoRepository
 from src.services.auth_user import get_current_user
+from src.services.cloudinary_tr import apply_transformation_endpoint
 
 router = APIRouter(prefix="/photos", tags=["photos"])
 
-@router.post("/", response_model=PhotoOut, status_code=201, summary="Create a new photo")
+
+@router.post(
+    "/", response_model=PhotoOut, status_code=201, summary="Create a new photo"
+)
 async def create_photo(
     photo_data: PhotoIn,
     current_user: dict = Depends(get_current_user),
@@ -40,7 +44,7 @@ async def get_all_photos(db: Session = Depends(get_db)):
     :return: List of all photos.
     """
     photo_repo = PhotoRepository(db)
-    photos = await photo_repo.get_all_photos()
+    photos = photo_repo.get_all_photos()
     return photos
 
 
@@ -112,11 +116,10 @@ async def delete_photo(
     return deleted_photo
 
 
-
 @router.get("/search/", response_model=List[PhotoOut], summary="Search photos by tag")
 async def search_photos_by_tag(
     tag: str = Query(..., description="Tag to search for"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """
     Search photos by tag.
@@ -130,12 +133,15 @@ async def search_photos_by_tag(
     return photos
 
 
-@router.get("/filter/", response_model=List[PhotoOut], summary="Filter photos by criteria")
+@router.get(
+    "/filter/", response_model=List[PhotoOut], summary="Filter photos by criteria"
+)
 async def filter_photos(
     tag: str = None,
     start_date: str = None,
     end_date: str = None,
-    db: Session = Depends(get_db)
+    min_rating: str = None,
+    db: Session = Depends(get_db),
 ):
     """
     Filter photos by specified criteria.
@@ -151,8 +157,10 @@ async def filter_photos(
     photos = await photo_repo.filter_photos(tag, min_rating, start_date, end_date)
     return photos
 
+
 @router.post(
-    "/{photo_id}/transform", response_model=PhotoOut,
+    "/{photo_id}/transform",
+    response_model=PhotoOut,
     summary="Apply transformation to a photo by ID",
 )
 async def transform_photo(
@@ -164,7 +172,11 @@ async def transform_photo(
     """
     transformed_url = apply_transformation_endpoint(photo_id)
     if transformed_url:
-        return {"message": "Zdjęcie po zastosowaniu transformacji:", "transformed_url": transformed_url}
+        return {
+            "message": "Zdjęcie po zastosowaniu transformacji:",
+            "transformed_url": transformed_url,
+        }
     else:
-        raise HTTPException(status_code=404, detail="Nie znaleziono zdjęcia o podanym ID.")
-
+        raise HTTPException(
+            status_code=404, detail="Nie znaleziono zdjęcia o podanym ID."
+        )
