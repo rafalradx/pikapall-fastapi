@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
-from . import models
+from src.database.models import Comment
 from datetime import datetime
-from .schemas.user import RoleEnum
+from src.schemas.users import RoleEnum
 
 
 def create_comment(db: Session, photo_id: int, user_id: int, content: str):
@@ -14,17 +14,18 @@ def create_comment(db: Session, photo_id: int, user_id: int, content: str):
     :param content: Treść komentarza.
     :return: Nowo utworzony obiekt komentarza.
     """
-    new_comment = models.Comment(
+    new_comment = Comment(
         photo_id=photo_id,
         user_id=user_id,
         content=content,
         created_at=datetime.now(),
-        updated_at=datetime.now()
+        updated_at=datetime.now(),
     )
     db.add(new_comment)
     db.commit()
     db.refresh(new_comment)
     return new_comment
+
 
 def update_comment(db: Session, comment_id: int, user_id: int, new_content: str):
     """
@@ -36,7 +37,7 @@ def update_comment(db: Session, comment_id: int, user_id: int, new_content: str)
     :param new_content: Nowa treść komentarza.
     :return: Zaktualizowany obiekt komentarza lub None, jeśli użytkownik nie jest autorem komentarza.
     """
-    comment = db.query(models.Comment).filter(models.Comment.id == comment_id).first()
+    comment = db.query(Comment).filter(Comment.id == comment_id).first()
     if comment and comment.user_id == user_id:
         comment.content = new_content
         comment.updated_at = datetime.now()
@@ -44,6 +45,7 @@ def update_comment(db: Session, comment_id: int, user_id: int, new_content: str)
         db.refresh(comment)
         return comment
     return None
+
 
 def delete_comment(db: Session, comment_id: int, user_role: RoleEnum):
     """
@@ -55,7 +57,7 @@ def delete_comment(db: Session, comment_id: int, user_role: RoleEnum):
     :return: True, jeśli komentarz został pomyślnie usunięty, w przeciwnym razie False.
     """
     if user_role in [RoleEnum.admin, RoleEnum.mod]:
-        comment = db.query(models.Comment).filter(models.Comment.id == comment_id).first()
+        comment = db.query(Comment).filter(Comment.id == comment_id).first()
         if comment:
             db.delete(comment)
             db.commit()
@@ -71,4 +73,4 @@ def get_comments_for_photo(db: Session, photo_id: int):
     :param photo_id: Identyfikator zdjęcia.
     :return: Lista komentarzy dla danego zdjęcia.
     """
-    return db.query(models.Comment).filter(models.Comment.photo_id == photo_id).all()
+    return db.query(Comment).filter(Comment.photo_id == photo_id).all()
