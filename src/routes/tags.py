@@ -22,7 +22,7 @@ async def read_all_tags(
     return tags
 
 
-@router.get("/{tag_id}", response_model=TagOut)
+@router.get("/id/{tag_id}", response_model=TagOut)
 async def read_tag_by_id(
     tag_id: int,
     db: Session = Depends(get_db),
@@ -35,7 +35,8 @@ async def read_tag_by_id(
         )
     return tag
 
-@router.get("/{tag_name}", response_model=TagOut)
+
+@router.get("/name/{tag_name}", response_model=TagOut)
 async def read_tag_by_name(
     tag_name: str,
     db: Session = Depends(get_db),
