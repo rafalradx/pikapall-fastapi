@@ -35,6 +35,17 @@ async def read_tag_by_id(
         )
     return tag
 
+@router.get("/{tag_name}", response_model=TagOut)
+async def read_tag_by_name(
+    tag_name: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    tag = await repository_tags.get_tag_by_name(tag_name, db)
+    if tag is None:
+        tag = await repository_tags.create_tag(tag_name, db)
+    return tag
+
 
 @router.post("/", response_model=TagOut, status_code=status.HTTP_201_CREATED)
 async def create_tag(
