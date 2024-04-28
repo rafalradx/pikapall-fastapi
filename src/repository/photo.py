@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from src.database.models import Photo
 from src.schemas.photo import PhotoIn, PhotoUpdate, PhotoOut
+from typing import List
 
 
 class PhotoRepository:
@@ -35,5 +36,20 @@ class PhotoRepository:
         await self.db.commit()
         return existing_photo
 
-    async def get_all_photos(self) -> list[PhotoOut]:
+    async def get_all_photos(self) -> List[PhotoOut]:
         return self.db.query(Photo).all()
+
+    async def search_photos_by_tag(self, tag: str) -> List[PhotoOut]:
+        return self.db.query(Photo).filter(Photo.tags.contains(tag)).all()
+
+    async def filter_photos(
+            self, tag: str = None, min_rating: int = None, start_date: str = None, end_date: str = None
+    ) -> List[PhotoOut]:
+        query = self.db.query(Photo)
+        if tag:
+            query = query.filter(Photo.tags.contains(tag))
+        if start_date:
+            query = query.filter(Photo.upload_date >= start_date)
+        if end_date:
+            query = query.filter(Photo.upload_date <= end_date)
+        return query.all()
