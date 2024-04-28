@@ -21,7 +21,7 @@ class PhotoRepository:
         :param user_id: The ID of the user creating the photo.
         :return: The newly created Photo object.
         """
-        new_photo = Photo(**photo_data.dict(), user_id=user_id)
+        new_photo = Photo(**photo_data.model_dump(), user_id=user_id)
         self.db.add(new_photo)
         await self.db.commit()
         return new_photo
@@ -87,7 +87,11 @@ class PhotoRepository:
         return self.db.query(Photo).filter(Photo.tags.contains(tag)).all()
 
     async def filter_photos(
-            self, tag: str = None, min_rating: int = None, start_date: str = None, end_date: str = None
+        self,
+        tag: str = None,
+        min_rating: int = None,
+        start_date: str = None,
+        end_date: str = None,
     ) -> List[PhotoOut]:
         """
         Filter photos by various criteria.
@@ -102,7 +106,7 @@ class PhotoRepository:
         if tag:
             query = query.filter(Photo.tags.contains(tag))
         if start_date:
-            query = query.filter(Photo.upload_date >= start_date)
+            query = query.filter(Photo.created_at >= start_date)
         if end_date:
-            query = query.filter(Photo.upload_date <= end_date)
+            query = query.filter(Photo.created_at <= end_date)
         return query.all()
