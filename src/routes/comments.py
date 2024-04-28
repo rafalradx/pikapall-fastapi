@@ -2,8 +2,6 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from datetime import datetime
 from src.repository import comments
-from src.database import SessionLocal
-from src.schemas.user import RoleEnum
 from src.database.db import get_db
 from src.schemas.users import RoleEnum, UserOut
 from src.schemas.photo import CommentOut
