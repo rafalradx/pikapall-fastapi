@@ -42,6 +42,7 @@ class Photo(Base):
     )
     description = Column(Text)
     image_url = Column(String(255), nullable=False)
+    image_url_transform = Column(String(255), nullable=True)
     qr_code_url = Column(String(255))  # QRcode
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     user = relationship("User", backref="photos")
