@@ -69,29 +69,6 @@ async def favicon():
     )
 
 
-@app.get("/apply_transformation")  
-async def apply_transformation_endpoint(photo_id: int, transformation_choice: int):
-    if transformation_choice == 1:
-        transformation = {"width": 300, "height": 200}
-    elif transformation_choice == 2:
-        transformation = {"crop": "fill"}
-    elif transformation_choice == 3:
-        transformation = {"effect": "grayscale"}
-    elif transformation_choice == 4:
-        transformation = {"angle": 90}
-    elif transformation_choice == 5:
-        transformation = {"blur": 500}
-    else:
-        return {"message": "Niepoprawny numer transformacji."}
-
-    with get_db_session() as db_session:
-        transformed_url = apply_transformation(db_session, photo_id, transformation)
-        if transformed_url:
-            return {"message": "Zdjęcie po zastosowaniu transformacji:", "transformed_url": transformed_url}
-        else:
-            return {"message": "Nie znaleziono zdjęcia o podanym ID."}
-
-
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
 

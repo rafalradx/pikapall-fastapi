@@ -34,14 +34,19 @@ def apply_transformation(db_session, photo_id, transformation):
     else:
         return None
 
-def display_available_transformations():
-    print("Dostępne transformacje:")
-    print("1. Rozmiar (width, height)")
-    print("2. Wycinanie (crop)")
-    print("3. Efekt (effect)")
-    print("4. Obrót (angle)")
-    print("5. Rozmycie (blur)")
 
+def apply_transformation_endpoint(photo_id: int):
+    transformation = {
+        "width": 100,
+        "height": 150,
+        "crop": "fill",
+        "effect": "sepia",
+        "angle": 45
+    }
 
-
-
+    with get_db_session() as db_session:
+        transformed_url = apply_transformation(db_session, photo_id, transformation)
+        if transformed_url:
+            return {"message": "Zdjęcie po zastosowaniu transformacji:", "transformed_url": transformed_url}
+        else:
+            return {"message": "Nie znaleziono zdjęcia o podanym ID."}

@@ -31,10 +31,10 @@ async def update_comment(
     current_user: RoleEnum = Depends(get_current_user),
 ):
     if current_user == RoleEnum.user:
-        raise HTTPException(status_code=403, detail="Only admins and mods can update comments")
+        raise HTTPException(status_code=403, detail="komentarze usuwa tylko admin lub moderator")
     updated_comment = await comments.update_comment(db, comment_id, user_id, new_content)
     if not updated_comment:
-        raise HTTPException(status_code=404, detail="Comment not found")
+        raise HTTPException(status_code=404, detail="nie znaleziono komentarza")
     return updated_comment
 
 
@@ -46,9 +46,9 @@ async def delete_comment(
     current_user: RoleEnum = Depends(get_current_user),
 ):
     if current_user not in [RoleEnum.admin, RoleEnum.mod]:
-        raise HTTPException(status_code=403, detail="Only admins and mods can delete comments")
+        raise HTTPException(status_code=403, detail="komentarze usuwa tylko admin lub moderator")
     if not await comments.delete_comment(db, comment_id, user_role):
-        raise HTTPException(status_code=404, detail="Comment not found")
+        raise HTTPException(status_code=404, detail="nie znaleziono komentarza")
 
 
 @router.get("/comments/{photo_id}/", response_model=list[CommentOut], status_code=200)
