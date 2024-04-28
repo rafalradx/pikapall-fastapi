@@ -4,6 +4,7 @@ from src.database.db import SessionLocal
 from src.repository.users import UserRepository
 from src.repository.photos import PhotoRepository
 from src.repository.tags import TagRepository
+from src.repository.comments import CommentsRepository
 from src.config import settings
 from redis.asyncio import Redis
 
@@ -18,6 +19,10 @@ def get_photos_repository() -> PhotoRepository:
 
 def get_tags_repository() -> TagRepository:
     return TagRepository(SessionLocal())
+
+
+def get_comments_repository() -> CommentsRepository:
+    return CommentsRepository(SessionLocal())
 
 
 def get_password_handler() -> AbstractPasswordHashHandler:
