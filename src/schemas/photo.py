@@ -30,17 +30,16 @@ class CommentOut(CommentIn):
 
 
 class PhotoIn(BaseModel):
-    """
-    Pydantic model representing input data for creating a photo.
-
-    """
-
     image_url: str = Field(max_length=255)
     description: str = Field(max_length=500)
-    tags: List[int] | None
+    tags: List[str] | None
 
 
 class PhotoOut(PhotoIn):
+    """
+    Pydantic model representing output data for retrieving a photo.
+
+    """
 
     id: int
     image_url_transform: str = Field(max_length=255)
@@ -54,21 +53,23 @@ class PhotoOut(PhotoIn):
 class PhotoUpdate(BaseModel):
     image_url_transform: str = Field(max_length=255)
     description: str = Field(max_length=500)
-    tags: List[int] | None
+    tags: List[str] | None
 
 
-# class PhotoBase(BaseModel):
-#     description: Optional[str]
+class TransformationInput(BaseModel):
+    width: int
+    height: int
+    crop: str
+    effect: str
+    angle: int
 
-# class PhotoCreate(PhotoBase):
-#     pass
-
-# class PhotoOut(PhotoBase):
-#     id: int
-#     user_id: int
-#     image_url: str
-#
-#
-#    class Config:
-#        from_attributes = True
-#
+    class Config:
+        schema_extra = {
+            "example": {
+                "width": 100,
+                "height": 150,
+                "crop": "fill",
+                "effect": "sepia",
+                "angle": 45
+            }
+        }
