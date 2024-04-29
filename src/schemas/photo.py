@@ -29,11 +29,13 @@ class CommentOut(CommentIn):
     class Config:
         from_attributes = True
 
+
 class CommentDisplay(BaseModel):
     user: str
     content: str
     created_at: datetime
     updated_at: datetime
+
 
 class PhotoIn(BaseModel):
     # image_url: str = Field(max_length=255, default=None)
@@ -76,6 +78,12 @@ class PhotoUpdate(BaseModel):
     image_url_transform: str = Field(max_length=255)
     description: str = Field(max_length=500)
     tags: List[str] | None
+
+    @validator("tags")
+    def validate_tags(cls, tags):
+        if tags is not None and len(tags) > 5:
+            raise ValueError("Number of tags cannot exceed 5.")
+        return tags
 
 
 class TransformationInput(BaseModel):
