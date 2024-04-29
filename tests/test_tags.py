@@ -11,30 +11,44 @@ class TestTags(unittest.IsolatedAsyncioTestCase):
         self.session = MagicMock(spec=Session)
         self.tags_repository = TagRepository(db_session=self.session)
 
+    async def test_create_tag(self):
+        tag_name = "Nature"
+        new_tag = Tag(name=tag_name)
+        self.session.query(Tag).filter(
+            Tag.name == tag_name).first.return_value = None
+        await self.tags_repository.create_tag(tag_name=tag_name)
+        self.session.add.assert_called_once_with(unittest.mock.ANY)
+        self.session.commit.assert_called_once()
+
     async def test_get_tags(self):
         tags = [Tag(), Tag(), Tag()]
         self.session.query().offset().limit().all.return_value = tags
         result = await self.tags_repository.get_all_tags(skip=0, limit=10)
         self.assertEqual(result, tags)
 
-    async def test_get_tag_found(self):
+    async def test_get_tag_by_id_found(self):
         tag = Tag()
         self.session.query(Tag).filter(Tag.id == 1).first.return_value = tag
         result = await self.tags_repository.get_tag_by_id(tag_id=1)
         self.assertEqual(result, tag)
 
-    async def test_get_tag_not_found(self):
+    async def test_get_tag_by_name_found(self):
+        tag = Tag()
+        self.session.query(Tag).filter(
+            Tag.name == "Nature").first.return_value = tag
+        result = await self.tags_repository.get_tag_by_name(tag_name="Nature")
+        self.assertEqual(result, tag)
+
+    async def test_get_tag_by_name_not_found(self):
+        self.session.query(Tag).filter(
+            Tag.name == "Sun").first.return_value = None
+        result = await self.tags_repository.get_tag_by_name(tag_name="Sun")
+        self.assertIsNone(result)
+
+    async def test_get_tag_by_id_not_found(self):
         self.session.query(Tag).filter(Tag.id == 1).first.return_value = None
         result = await self.tags_repository.get_tag_by_id(tag_id=1)
         self.assertIsNone(result)
-
-    async def test_create_tag(self):
-        tag_name = "Nature"
-        new_tag = Tag(name=tag_name)
-        self.session.query(Tag).filter(Tag.name == tag_name).first.return_value = None
-        await self.tags_repository.create_tag(tag_name=tag_name)
-        self.session.add.assert_called_once_with(unittest.mock.ANY)
-        self.session.commit.assert_called_once()
 
     async def test_update_tag(self):
         tag = Tag(id=1, name="Old Name")
