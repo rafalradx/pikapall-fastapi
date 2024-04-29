@@ -1,6 +1,7 @@
 from datetime import datetime
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, validator, model_validator
 from typing import List, Optional
+import json
 
 
 class TagIn(BaseModel):
@@ -28,16 +29,29 @@ class CommentOut(CommentIn):
     class Config:
         from_attributes = True
 
+class CommentDisplay(BaseModel):
+    user: str
+    content: str
+    created_at: datetime
+    updated_at: datetime
 
 class PhotoIn(BaseModel):
-    image_url: str = Field(max_length=255, default=None)
+    # image_url: str = Field(max_length=255, default=None)
     description: str = Field(max_length=500)
     tags: List[str] | None = None
+
+    @model_validator(mode='before')
+    @classmethod
+    def validate_to_json(cls, value):
+        print(value)
+        if isinstance(value, str):
+            return cls(**json.loads(value))
+        return value
 
     @validator("tags")
     def validate_tags(cls, tags):
         if tags is not None and len(tags) > 5:
-            raise ValueError("Number of tags cannot exceed 5")
+            raise ValueError("Number of tags cannot exceed 5.")
         return tags
 
 
@@ -47,10 +61,12 @@ class PhotoOut(PhotoIn):
 
     """
 
-    id: int
+    image_url: str = Field(max_length=255, default=None)
     image_url_transform: str = Field(max_length=255)
     user_id: int
     created_at: datetime
+    id: int
+    comments: List[CommentDisplay]
 
     class Config:
         from_attributes = True

@@ -1,9 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
-from src.schemas.photo import PhotoIn, PhotoOut, TransformationInput
+from src.schemas.photo import PhotoIn, PhotoOut, PhotoCreate, TransformationInput
 from dependencies import get_image_provider, get_photos_repository, PhotoRepository
 from src.schemas.users import UserOut
 from src.services.auth_user import get_current_user
+from src.services.cloudinary_tr import CloudinaryImageProvider
 from src.services.abstract import AbstractImageProvider
+from src.routes.tags import read_tag_by_name
+from src.repository.tags import TagRepository
+from dependencies import get_tags_repository
 
 router = APIRouter(prefix="/photos", tags=["photos"])
 
@@ -16,7 +20,8 @@ async def create_photo(
     file: UploadFile = File(),
     current_user: UserOut = Depends(get_current_user),
     photos_repository: PhotoRepository = Depends(get_photos_repository),
-    image_provider: AbstractImageProvider = Depends(get_image_provider),
+    image_provider: CloudinaryImageProvider = Depends(get_image_provider),
+    tags_repository: TagRepository = Depends(get_tags_repository)
 ):
     """
     Create a new photo.
@@ -28,9 +33,15 @@ async def create_photo(
     """
     if not current_user:
         raise HTTPException(status_code=401, detail="Unauthorized")
-
-    photo_data.image_url = image_provider.upload(file, current_user)
-    new_photo = await photos_repository.create_photo(photo_data, current_user.id)
+    photo_tags = []
+    
+    for tag_name in photo_data.tags:
+        tag = await read_tag_by_name(tag_name, )
+        photo_tags.append(tag.id)
+    photo_url = image_provider.upload(file, current_user)
+    print(f"Description: {photo_data.description}")
+    photo_data.tags = photo_tags
+    new_photo = await photos_repository.create_photo(photo_data, photo_url, current_user.id)
     return new_photo
 
 
