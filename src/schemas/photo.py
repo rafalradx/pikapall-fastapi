@@ -29,18 +29,19 @@ class CommentOut(CommentIn):
     class Config:
         from_attributes = True
 
+
 class CommentDisplay(BaseModel):
     user: str
     content: str
     created_at: datetime
     updated_at: datetime
 
+
 class PhotoIn(BaseModel):
-    # image_url: str = Field(max_length=255, default=None)
     description: str = Field(max_length=500)
     tags: Optional[List[str]] | None = None
 
-    @model_validator(mode='before')
+    @model_validator(mode="before")
     @classmethod
     def validate_to_json(cls, value):
         print(value)
@@ -54,19 +55,22 @@ class PhotoIn(BaseModel):
             raise ValueError("Number of tags cannot exceed 5.")
         return tags
 
+
 class PhotoCreate(BaseModel):
     description: str = Field(max_length=500)
     tags: Optional[List[int]] | None = None
     image_url: str = Field(max_length=255, default=None)
+
 
 class PhotoOut(BaseModel):
     """
     Pydantic model representing output data for retrieving a photo.
 
     """
+
     id: int
     description: str = Field(max_length=500)
-    tags: Optional[List[int]] | None = None
+    tags: Optional[List[TagOut]] | None = None
     image_url: str = Field(max_length=255, default=None)
     image_url_transform: Optional[str] = Field(max_length=255)
     user_id: int

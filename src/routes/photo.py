@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
-from src.schemas.photo import PhotoIn, PhotoCreate, PhotoOut, TransformationInput
+from src.schemas.photo import PhotoCreate, PhotoIn, PhotoOut, TransformationInput
 from dependencies import get_image_provider, get_photos_repository, PhotoRepository
 from src.schemas.users import UserOut
 from src.services.auth_user import get_current_user
@@ -21,7 +21,7 @@ async def create_photo(
     current_user: UserOut = Depends(get_current_user),
     photos_repository: PhotoRepository = Depends(get_photos_repository),
     image_provider: CloudinaryImageProvider = Depends(get_image_provider),
-    tags_repository: TagRepository = Depends(get_tags_repository)
+    tags_repository: TagRepository = Depends(get_tags_repository),
 ):
     """
     Create a new photo.
@@ -34,12 +34,15 @@ async def create_photo(
     if not current_user:
         raise HTTPException(status_code=401, detail="Unauthorized")
     photo_tags = []
-    
+
     for tag_name in photo_data.tags:
         tag = await read_tag_by_name(tag_name, tags_repository)
         photo_tags.append(tag.id)
     photo_url = image_provider.upload(file, current_user)
-    data = PhotoCreate(description=photo_data.description, tags=photo_tags, image_url=photo_url)
+    data = PhotoCreate(
+        description=photo_data.description, tags=photo_tags, image_url=photo_url
+    )
+    photo_data.tags = photo_tags
     new_photo = await photos_repository.create_photo(data, current_user.id)
     return new_photo
 
@@ -193,6 +196,4 @@ async def transform_photo(
             "transformed_url": transformed_url,
         }
     else:
-        raise HTTPException(
-            status_code=404, detail="No photo found."
-        )
+        raise HTTPException(status_code=404, detail="No photo found.")
