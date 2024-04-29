@@ -30,15 +30,16 @@ class CommentOut(CommentIn):
 
 
 class PhotoIn(BaseModel):
-    image_url: str = Field(max_length=255)
+    image_url: str = Field(max_length=255, default=None)
     description: str = Field(max_length=500)
-    tags: List[str] | None
+    tags: List[str] | None = None
 
-    @validator('tags')
+    @validator("tags")
     def validate_tags(cls, tags):
         if tags is not None and len(tags) > 5:
             raise ValueError("Number of tags cannot exceed 5")
         return tags
+
 
 class PhotoOut(PhotoIn):
     """
@@ -60,6 +61,7 @@ class PhotoUpdate(BaseModel):
     description: str = Field(max_length=500)
     tags: List[str] | None
 
+
 class TransformationInput(BaseModel):
     width: int
     height: int
@@ -74,8 +76,6 @@ class TransformationInput(BaseModel):
                 "height": 150,
                 "crop": "fill",
                 "effect": "sepia",
-                "angle": 45
+                "angle": 45,
             }
         }
-
-

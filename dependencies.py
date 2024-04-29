@@ -1,4 +1,6 @@
 from src.repository.abstract import AbstractUserRepository
+from src.services.abstract import AbstractImageProvider
+from src.services.cloudinary_tr import CloudinaryImageProvider
 from src.services.pwd_handler import AbstractPasswordHashHandler, BcryptPasswordHandler
 from src.database.db import SessionLocal
 from src.repository.users import UserRepository
@@ -23,6 +25,15 @@ def get_tags_repository() -> TagRepository:
 
 def get_comments_repository() -> CommentsRepository:
     return CommentsRepository(SessionLocal())
+
+
+def get_image_provider() -> AbstractImageProvider:
+    cloud_setting = {
+        "cloud_name": settings.cloudinary_name,
+        "api_key": settings.cloudinary_api_key,
+        "api_secret": settings.cloudinary_api_secret,
+    }
+    return CloudinaryImageProvider(cloud_setting)
 
 
 def get_password_handler() -> AbstractPasswordHashHandler:
