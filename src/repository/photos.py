@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from src.database.models import Photo
+from src.database.models import Photo, Tag
 from src.schemas.photo import PhotoIn, PhotoUpdate, PhotoOut
 from typing import List
 from src.repository.tags import TagRepository
@@ -22,7 +22,9 @@ class PhotoRepository:
         :param user_id: The ID of the user creating the photo.
         :return: The newly created Photo object.
         """
-        new_photo = Photo(description=photo_data.description, image_url=photo_url, user_id=user_id)
+        tags = self.db.query(Tag).filter(Tag.id.in_(photo_data.tags)).all()
+        new_photo = Photo(description=photo_data.description, tags=tags, image_url=photo_url, user_id=user_id)
+
         self.db.add(new_photo)
         self.db.commit()
         self.db.refresh(new_photo)
