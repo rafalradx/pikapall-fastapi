@@ -10,13 +10,13 @@ class CommentsRepository:
 
     async def create_comment(self, photo_id: int, user_id: int, content: str):
         """
-        Funkcja tworząca nowy komentarz do zdjęcia.
+        Function that creates a new comment for a photo.
 
-        :param db: Sesja bazy danych.
-        :param photo_id: Identyfikator zdjęcia.
-        :param user_id: Identyfikator użytkownika, który dodaje komentarz.
-        :param content: Treść komentarza.
-        :return: Nowo utworzony obiekt komentarza.
+        :param db: Database session.
+        :param photo_id: Photo ID.
+        :param user_id: The ID of the user who is adding the comment.
+        :param content: Comment content.
+        :return: A newly created comment object.
         """
         new_comment = Comment(
             photo_id=photo_id,
@@ -32,13 +32,13 @@ class CommentsRepository:
 
     async def update_comment(self, comment_id: int, user_id: int, new_content: str):
         """
-        Funkcja aktualizująca treść komentarza.
+        Function that updates the comment content.
 
-        :param db: Sesja bazy danych.
-        :param comment_id: Identyfikator komentarza do aktualizacji.
-        :param user_id: Identyfikator użytkownika, który dodaje komentarz.
-        :param new_content: Nowa treść komentarza.
-        :return: Zaktualizowany obiekt komentarza lub None, jeśli użytkownik nie jest autorem komentarza.
+        :param db: Database session.
+        :param comment_id: The ID of the update comment.
+        :param user_id: The ID of the user who is adding the comment.
+        :param new_content: New comment content.
+        :return: The updated comment object, or None if the user is not the author of the comment.
         """
         comment = self._db.query(Comment).filter(Comment.id == comment_id).first()
         if comment and comment.user_id == user_id:
@@ -51,12 +51,12 @@ class CommentsRepository:
 
     async def delete_comment(self, comment_id: int, user_role: RoleEnum):
         """
-        Funkcja usuwająca komentarz.
+        Function to remove a comment.
 
-        :param db: Sesja bazy danych.
-        :param comment_id: Identyfikator komentarza do usunięcia.
-        :param user_role: Rola użytkownika.
-        :return: True, jeśli komentarz został pomyślnie usunięty, w przeciwnym razie False.
+        :param db: Database session.
+        :param comment_id: The ID of the comment to be deleted.
+        :param user_role: User role.
+        :return: True if the comment was successfully deleted, otherwise False.
         """
         if user_role in [RoleEnum.admin, RoleEnum.mod]:
             comment = self._db.query(Comment).filter(Comment.id == comment_id).first()
@@ -68,10 +68,10 @@ class CommentsRepository:
 
     async def get_comments_for_photo(self, photo_id: int):
         """
-        Funkcja zwracająca wszystkie komentarze dla danego zdjęcia.
+        A function that returns all comments for a given photo.
 
-        :param db: Sesja bazy danych.
-        :param photo_id: Identyfikator zdjęcia.
-        :return: Lista komentarzy dla danego zdjęcia.
+        :param db: Database session.
+        :param photo_id: Photo ID.
+        :return: List of comments for a given photo.
         """
         return self._db.query(Comment).filter(Comment.photo_id == photo_id).all()

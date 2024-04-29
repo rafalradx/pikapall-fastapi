@@ -19,7 +19,7 @@ async def create_comment(
 ):
     if current_user.role == RoleEnum.user:
         raise HTTPException(
-            status_code=403, detail="Only admins and mods can create comments"
+            status_code=403, detail="Only admins and mods can create comments."
         )
     return await comments_repo.create_comment(photo_id, user_id, content)
 
@@ -34,13 +34,13 @@ async def update_comment(
 ):
     if current_user.role == RoleEnum.user:
         raise HTTPException(
-            status_code=403, detail="komentarze usuwa tylko admin lub moderator"
+            status_code=403, detail="Only admins and mods can update comments."
         )
     updated_comment = await comments_repo.update_comment(
         comment_id, user_id, new_content
     )
     if not updated_comment:
-        raise HTTPException(status_code=404, detail="nie znaleziono komentarza")
+        raise HTTPException(status_code=404, detail="No comment found.")
     return updated_comment
 
 
@@ -53,10 +53,10 @@ async def delete_comment(
 ):
     if current_user.role not in [RoleEnum.admin, RoleEnum.mod]:
         raise HTTPException(
-            status_code=403, detail="Komentarze usuwa tylko admin lub moderator"
+            status_code=403, detail="Only admins and mods can delete comments."
         )
     if not await comments_repo.delete_comment(comment_id, user_role):
-        raise HTTPException(status_code=404, detail="Nie znaleziono komentarza")
+        raise HTTPException(status_code=404, detail="No comment found.")
 
 
 @router.get("/comments/{photo_id}/", response_model=list[CommentOut], status_code=200)
@@ -64,4 +64,8 @@ async def get_comments_for_photo(
     photo_id: int,
     comments_repo: CommentsRepository = Depends(get_comments_repository),
 ):
-    return await comments_repo.get_comments_for_photo(photo_id)
+    comments = await comments_repo.get_comments_for_photo(photo_id)
+    if not comments:
+        raise HTTPException(status_code=404, detail="No comments found.")
+    return comments
+    
