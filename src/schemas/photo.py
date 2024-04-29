@@ -38,7 +38,7 @@ class CommentDisplay(BaseModel):
 class PhotoIn(BaseModel):
     # image_url: str = Field(max_length=255, default=None)
     description: str = Field(max_length=500)
-    tags: List[str] | None = None
+    tags: Optional[List[str]] | None = None
 
     @model_validator(mode='before')
     @classmethod
@@ -62,11 +62,11 @@ class PhotoOut(PhotoIn):
     """
 
     image_url: str = Field(max_length=255, default=None)
-    image_url_transform: str = Field(max_length=255)
+    image_url_transform: Optional[str] = Field(max_length=255)
     user_id: int
     created_at: datetime
     id: int
-    comments: List[CommentDisplay]
+    comments: Optional[List[CommentDisplay]]
 
     class Config:
         from_attributes = True
