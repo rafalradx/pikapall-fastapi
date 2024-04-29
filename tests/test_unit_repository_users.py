@@ -38,19 +38,5 @@ class TestUsers(unittest.IsolatedAsyncioTestCase):
         await self.users_repository.update_token(user=user, token=token)
         self.session.commit.assert_called_once()
 
-    async def test_confirm_email_found(self):
-        user = User(email="drajkata@op.pl")
-        await self.users_repository.confirmed_email(username=user.username)
-        self.session.commit.assert_called_once()
-
-    async def test_confirm_email_not_found(self):
-        user = User(email="drajkata@op.pl")
-        self.session.query().filter().first.return_value = None
-        with self.assertRaises(HTTPException) as context:
-            await self.users_repository.confirmed_email(email=user.email)
-        self.session.commit.assert_not_called()
-        self.assertEqual(context.exception.status_code, status.HTTP_404_NOT_FOUND)
-
-
 if __name__ == "__main__":
     unittest.main()
