@@ -28,7 +28,7 @@ async def read_tag_by_id(
     tag = await tags_repository.get_tag_by_id(tag_id)
     if tag is None:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Tag not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail="Tag not found."
         )
     return tag
 
@@ -41,7 +41,9 @@ async def read_tag_by_name(
 ):
     tag = await tags_repository.get_tag_by_name(tag_name)
     if tag is None:
-        tag = await tags_repository.create_tag(tag_name)
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Tag not found."
+        )
     return tag
 
 
@@ -65,7 +67,7 @@ async def update_tag(
     tag = await tags_repository.update_tag(tag_id, body)
     if tag is None:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Tag not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail="Tag not found."
         )
     return tag
 
@@ -78,8 +80,7 @@ async def remove_tag(
 ):
     if tag_id is None:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Tag not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail="Tag not found."
         )
     tag = await tags_repository.delete_tag(tag_id)
-
     return tag
