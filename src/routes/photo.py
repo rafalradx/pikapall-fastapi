@@ -56,6 +56,8 @@ async def get_all_photos(
     :return: List of all photos.
     """
     photos = await photos_repository.get_all_photos()
+    if not photos:
+        raise HTTPException(status_code=404, detail="No photos found.")
     return photos
 
 
@@ -72,7 +74,7 @@ async def get_photo_by_id(
     """
     photo = await photos_repository.get_photo_by_id(photo_id)
     if not photo:
-        raise HTTPException(status_code=404, detail="Photo not found")
+        raise HTTPException(status_code=404, detail="Photo not found.")
     return photo
 
 
@@ -99,7 +101,7 @@ async def update_photo(
         photo_id, photo_data, current_user.id
     )
     if not updated_photo:
-        raise HTTPException(status_code=404, detail="Photo not found")
+        raise HTTPException(status_code=404, detail="Photo not found.")
     return updated_photo
 
 
@@ -122,7 +124,7 @@ async def delete_photo(
 
     deleted_photo = await photos_repository.delete_photo(photo_id, current_user.id)
     if not deleted_photo:
-        raise HTTPException(status_code=404, detail="Photo not found")
+        raise HTTPException(status_code=404, detail="Photo not found.")
     return deleted_photo
 
 
@@ -188,10 +190,10 @@ async def transform_photo(
     )
     if transformed_url:
         return {
-            "message": "Zdjęcie po zastosowaniu transformacji:",
+            "message": "Photo after applying the transformation:",
             "transformed_url": transformed_url,
         }
     else:
         raise HTTPException(
-            status_code=404, detail="Nie znaleziono zdjęcia o podanym ID."
+            status_code=404, detail="No photo found."
         )
