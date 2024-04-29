@@ -81,10 +81,30 @@ class PhotoOut(BaseModel):
         from_attributes = True
 
 
-class PhotoUpdate(BaseModel):
-    image_url_transform: str = Field(max_length=255)
+class PhotoUpdateIn(BaseModel):
     description: str = Field(max_length=500)
-    tags: List[str] | None
+    tags: Optional[List[str]] | None = None
+    image_url_transform: Optional[str] = Field(max_length=255, default=None)
+    
+    @model_validator(mode="before")
+    @classmethod
+    def validate_to_json(cls, value):
+        print(value)
+        if isinstance(value, str):
+            return cls(**json.loads(value))
+        return value
+
+    @validator("tags")
+    def validate_tags(cls, tags):
+        if tags is not None and len(tags) > 5:
+            raise ValueError("Number of tags cannot exceed 5.")
+        return tags
+
+
+class PhotoUpdateOut(BaseModel):
+    description: str = Field(max_length=500)
+    tags: Optional[List[int]] | None = None
+    image_url_transform: Optional[str] = Field(max_length=255, default=None)
 
     @validator("tags")
     def validate_tags(cls, tags):
