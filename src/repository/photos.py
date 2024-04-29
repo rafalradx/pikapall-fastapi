@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
-from src.database.models import Photo
-from src.schemas.photo import PhotoIn, PhotoUpdate, PhotoOut
+from src.database.models import Photo, Tag
+from src.schemas.photo import PhotoCreate, PhotoUpdate, PhotoOut
 from typing import List
 from src.repository.tags import TagRepository
 
@@ -14,7 +14,7 @@ class PhotoRepository:
         """
         self.db = db
 
-    async def create_photo(self, photo_data: PhotoIn, photo_url: str, user_id: int) -> PhotoOut:
+    async def create_photo(self, photo_data: PhotoCreate, user_id: int) -> PhotoOut:
         """
         Create a new photo.
 
@@ -22,7 +22,14 @@ class PhotoRepository:
         :param user_id: The ID of the user creating the photo.
         :return: The newly created Photo object.
         """
-        new_photo = Photo(description=photo_data.description, image_url=photo_url, user_id=user_id)
+        print(f"tags_before.: {photo_data.tags}")
+        tags = self.db.query(Tag).filter(Tag.id.in_(photo_data.tags)).all()
+        print(f"desc.: {photo_data.description}")
+        print(f"tags.: {tags}")
+        print(f"image.: {photo_data.image_url}")
+        print(f"user.: {user_id}")
+        new_photo = Photo(description=photo_data.description, tags=tags, image_url=photo_data.image_url, user_id=user_id)
+
         self.db.add(new_photo)
         self.db.commit()
         self.db.refresh(new_photo)

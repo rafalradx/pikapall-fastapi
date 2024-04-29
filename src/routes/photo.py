@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
-from src.schemas.photo import PhotoIn, PhotoOut, TransformationInput
+from src.schemas.photo import PhotoIn, PhotoCreate, PhotoOut, TransformationInput
 from dependencies import get_image_provider, get_photos_repository, PhotoRepository
 from src.schemas.users import UserOut
 from src.services.auth_user import get_current_user
@@ -39,12 +39,8 @@ async def create_photo(
         tag = await read_tag_by_name(tag_name, tags_repository)
         photo_tags.append(tag.id)
     photo_url = image_provider.upload(file, current_user)
-    print(f"Description: {photo_data.description}")
-    photo_data.tags = photo_tags
-    print(f"Tags: {photo_data.tags}")
-    print(f"Photo data: {photo_data}")
-    
-    new_photo = await photos_repository.create_photo(photo_data, photo_url, current_user.id)
+    data = PhotoCreate(description=photo_data.description, tags=photo_tags, image_url=photo_url)
+    new_photo = await photos_repository.create_photo(data, current_user.id)
     return new_photo
 
 

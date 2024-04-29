@@ -54,18 +54,23 @@ class PhotoIn(BaseModel):
             raise ValueError("Number of tags cannot exceed 5.")
         return tags
 
+class PhotoCreate(BaseModel):
+    description: str = Field(max_length=500)
+    tags: Optional[List[int]] | None = None
+    image_url: str = Field(max_length=255, default=None)
 
-class PhotoOut(PhotoIn):
+class PhotoOut(BaseModel):
     """
     Pydantic model representing output data for retrieving a photo.
 
     """
-
+    id: int
+    description: str = Field(max_length=500)
+    tags: Optional[List[int]] | None = None
     image_url: str = Field(max_length=255, default=None)
     image_url_transform: Optional[str] = Field(max_length=255)
     user_id: int
     created_at: datetime
-    id: int
     comments: Optional[List[CommentDisplay]]
 
     class Config:
