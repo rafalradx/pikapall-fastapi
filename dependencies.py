@@ -7,6 +7,7 @@ from src.repository.users import UserRepository
 from src.repository.photos import PhotoRepository
 from src.repository.tags import TagRepository
 from src.repository.comments import CommentsRepository
+from src.repository.ratings import RatingRepository
 from src.config import settings
 from redis.asyncio import Redis
 
@@ -21,6 +22,10 @@ def get_photos_repository() -> PhotoRepository:
 
 def get_tags_repository() -> TagRepository:
     return TagRepository(SessionLocal())
+
+
+def get_rating_repository() -> RatingRepository:
+    return RatingRepository(SessionLocal())
 
 
 def get_comments_repository() -> CommentsRepository:

@@ -61,7 +61,8 @@ class User(Base):
         Enum("standard", "moderator", "administrator", name="role_types"),
         nullable=False,
     )
-    registration_date = Column(DateTime(timezone=True), server_default=func.now())
+    registration_date = Column(
+        DateTime(timezone=True), server_default=func.now())
     refresh_token = Column(String(255), nullable=True)
     comments = relationship("Comment", backref="user")
 
@@ -100,19 +101,26 @@ class Comment(Base):
 #     )
 
 #     UniqueConstraint("photo_id", "tag_id", name="unique_photo_tag")
-# class Rating(Base):
-#     __tablename__ = "ratings"
-#
-#     id = Column(Integer, primary_key=True)
-#     photo_id = Column(
-#         Integer, ForeignKey("photos.id", ondelete="CASCADE"), nullable=False
-#     )
-#     user_id = Column(
-#         Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
-#     )
-#     rating = Column(Integer, nullable=False)
-#
-#     UniqueConstraint("photo_id", "user_id", name="unique_photo_rating")
+
+class Rating(Base):
+    __tablename__ = "ratings"
+
+    id = Column(Integer, primary_key=True)
+    photo_id = Column(
+        Integer, ForeignKey("photos.id", ondelete="CASCADE"), nullable=False
+    )
+    user_id = Column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    rating = Column(Integer, nullable=False)
+    created_at = Column(DateTime, server_default=func.now())
+    updated_at = Column(DateTime, server_default=func.now(),
+                        onupdate=func.now())
+
+    UniqueConstraint("photo_id", "user_id", name="unique_photo_rating")
+
+    photo = relationship("Photo", back_populates="ratings")
+    user = relationship("User", back_populates="ratings")
 
 # class QRCode(Base):
 #     __tablename__ = 'qr_codes'
