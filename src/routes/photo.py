@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
-from src.schemas.photo import PhotoCreate, PhotoIn, PhotoOut, TransformationInput
+from src.schemas.photo import PhotoCreate, PhotoIn, PhotoOut, PhotoUpdateIn, PhotoUpdateOut,TransformationInput
 from dependencies import get_image_provider, get_tags_repository, get_photos_repository, PhotoRepository
 from src.schemas.users import UserOut
 from src.services.auth_user import get_current_user
@@ -33,7 +33,6 @@ async def create_photo(
     if not current_user:
         raise HTTPException(status_code=401, detail="Unauthorized.")
     photo_tags = []
-
     for tag_name in photo_data.tags:
         tag = await tags_repository.get_tag_by_name(tag_name)
         if tag is None:
@@ -43,7 +42,6 @@ async def create_photo(
     data = PhotoCreate(
         description=photo_data.description, tags=photo_tags, image_url=photo_url
     )
-    photo_data.tags = photo_tags
     new_photo = await photos_repository.create_photo(data, current_user.id)
     return new_photo
 
@@ -84,9 +82,10 @@ async def get_photo_by_id(
 @router.put("/{photo_id}", response_model=PhotoOut, summary="Update a photo by ID")
 async def update_photo(
     photo_id: int,
-    photo_data: PhotoIn,
+    photo_data: PhotoUpdateIn,
     current_user: UserOut = Depends(get_current_user),
     photos_repository: PhotoRepository = Depends(get_photos_repository),
+    tags_repository: TagRepository = Depends(get_tags_repository),
 ):
     """
     Update a photo by ID.
@@ -99,9 +98,15 @@ async def update_photo(
     """
     if not current_user:
         raise HTTPException(status_code=401, detail="Unauthorized")
-
+    photo_tags = []
+    for tag_name in photo_data.tags:
+        tag = await tags_repository.get_tag_by_name(tag_name)
+        if tag is None:
+            tag = await tags_repository.create_tag(tag_name)
+        photo_tags.append(tag.id)
+    data = PhotoUpdateOut(description=photo_data.description, tags=photo_tags, image_url_transform=photo_data.image_url_transform)
     updated_photo = await photos_repository.update_photo(
-        photo_id, photo_data, current_user.id
+        photo_id, data, current_user.id
     )
     if not updated_photo:
         raise HTTPException(status_code=404, detail="Photo not found.")

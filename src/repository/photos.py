@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from src.database.models import Photo, Tag
-from src.schemas.photo import PhotoCreate, PhotoUpdate, PhotoOut
+from src.schemas.photo import PhotoCreate, PhotoUpdateOut, PhotoOut
 from typing import List
 from src.repository.tags import TagRepository
 
@@ -22,14 +22,8 @@ class PhotoRepository:
         :param user_id: The ID of the user creating the photo.
         :return: The newly created Photo object.
         """
-        print(f"tags_before.: {photo_data.tags}")
         tags = self.db.query(Tag).filter(Tag.id.in_(photo_data.tags)).all()
-        print(f"desc.: {photo_data.description}")
-        print(f"tags.: {tags}")
-        print(f"image.: {photo_data.image_url}")
-        print(f"user.: {user_id}")
         new_photo = Photo(description=photo_data.description, tags=tags, image_url=photo_data.image_url, user_id=user_id)
-
         self.db.add(new_photo)
         self.db.commit()
         self.db.refresh(new_photo)
@@ -45,7 +39,7 @@ class PhotoRepository:
         return self.db.query(Photo).filter(Photo.id == photo_id).first()
 
     async def update_photo(
-        self, photo_id: int, photo_data: PhotoUpdate, user_id: int
+        self, photo_id: int, photo_data: PhotoUpdateOut, user_id: int
     ) -> PhotoOut:
         """
         Update a photo.
@@ -56,12 +50,14 @@ class PhotoRepository:
         :return: The updated Photo object if found, otherwise None.
         """
         existing_photo = await self.get_photo_by_id(photo_id)
-        if not existing_photo:
-            return None
-        for field, value in photo_data.dict(exclude_unset=True).items():
-            setattr(existing_photo, field, value)
-        await self.db.commit()
-        return existing_photo
+        if existing_photo:
+            tags = self.db.query(Tag).filter(Tag.id.in_(photo_data.tags)).all()
+            existing_photo.description = photo_data.description
+            existing_photo.tags = tags
+            existing_photo.image_url_transform = photo_data.image_url_transform
+            self.db.commit()
+        return existing_photo  
+
 
     async def delete_photo(self, photo_id: int, user_id: int) -> PhotoOut:
         """
