@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
-from src.schemas.photo import PhotoIn, PhotoOut
-from dependencies import get_photos_repository, PhotoRepository
+from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
+from src.schemas.photo import PhotoIn, PhotoOut, TransformationInput
+from dependencies import get_image_provider, get_photos_repository, PhotoRepository
 from src.schemas.users import UserOut
 from src.services.auth_user import get_current_user
-from src.services.cloudinary_tr import apply_transformation_endpoint
+from src.services.abstract import AbstractImageProvider
 
 router = APIRouter(prefix="/photos", tags=["photos"])
 
@@ -13,8 +13,10 @@ router = APIRouter(prefix="/photos", tags=["photos"])
 )
 async def create_photo(
     photo_data: PhotoIn,
+    file: UploadFile = File(),
     current_user: UserOut = Depends(get_current_user),
     photos_repository: PhotoRepository = Depends(get_photos_repository),
+    image_provider: AbstractImageProvider = Depends(get_image_provider),
 ):
     """
     Create a new photo.
@@ -27,6 +29,7 @@ async def create_photo(
     if not current_user:
         raise HTTPException(status_code=401, detail="Unauthorized")
 
+    photo_data.image_url = image_provider.upload(file, current_user)
     new_photo = await photos_repository.create_photo(photo_data, current_user.id)
     return new_photo
 
@@ -160,13 +163,18 @@ async def filter_photos(
     summary="Apply transformation to a photo by ID",
 )
 async def transform_photo(
-    photo_id: int,
+    id: int,
+    trans_body: TransformationInput,
     photos_repository: PhotoRepository = Depends(get_photos_repository),
+    image_provider: AbstractImageProvider = Depends(get_image_provider),
 ):
     """
     Apply transformation to a photo by ID.
     """
-    transformed_url = apply_transformation_endpoint(photo_id)
+    photo = photos_repository.get_photo_by_id(photo_id=id)
+    transformed_url = image_provider.transform(
+        url=photo.image_url, transform=trans_body
+    )
     if transformed_url:
         return {
             "message": "Zdjęcie po zastosowaniu transformacji:",
