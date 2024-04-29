@@ -75,7 +75,7 @@ class PhotoRepository:
         if not existing_photo:
             return None
         self.db.delete(existing_photo)
-        await self.db.commit()
+        self.db.commit()
         return existing_photo
 
     async def get_all_photos(self) -> List[PhotoOut]:
