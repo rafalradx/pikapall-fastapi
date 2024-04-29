@@ -86,6 +86,12 @@ class PhotoUpdate(BaseModel):
     description: str = Field(max_length=500)
     tags: List[str] | None
 
+    @validator("tags")
+    def validate_tags(cls, tags):
+        if tags is not None and len(tags) > 5:
+            raise ValueError("Number of tags cannot exceed 5.")
+        return tags
+
 
 class TransformationInput(BaseModel):
     width: int
