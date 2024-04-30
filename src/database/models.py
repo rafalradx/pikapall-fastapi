@@ -16,6 +16,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql.schema import ForeignKey
 from sqlalchemy.sql.sqltypes import DateTime
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.ext.hybrid import hybrid_property
 
 Base = declarative_base()
 
@@ -49,6 +50,15 @@ class Photo(Base):
     tags = relationship("Tag", secondary="photo_m2m_tags", backref="photos")
     comments = relationship("Comment", backref="photo")
     ratings = relationship("Rating", backref="photo")
+
+    @hybrid_property
+    def average_rating(self):
+        total_ratings = sum(rating.rating for rating in self.ratings)
+        num_ratings = len(self.ratings)
+        if num_ratings > 0:
+            return total_ratings / num_ratings
+        else:
+            return None
 
 
 class User(Base):

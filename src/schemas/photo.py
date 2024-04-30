@@ -55,6 +55,20 @@ class Rating(BaseModel):
 class RatingAvg(BaseModel):
     rating: Optional[float] | None = None
 
+class RatingIn(BaseModel):
+    photo_id: int
+    user_id: int
+    rating: int
+    created_at: datetime
+    updated_at: datetime
+
+
+class RatingOut(RatingIn):
+    id: int
+
+    class Config:
+        from_attributes = True
+
 class PhotoIn(BaseModel):
     description: str = Field(max_length=500)
     tags: Optional[List[str]] | None = None
@@ -92,9 +106,8 @@ class PhotoOut(BaseModel):
     image_url_transform: Optional[str] = Field(max_length=255)
     user_id: int
     created_at: datetime
-    ratings: Optional[RatingAvg]
+    average_rating: Optional[RatingAvg]
     comments: Optional[List[CommentDisplay]]
-    
 
     class Config:
         from_attributes = True
@@ -104,7 +117,7 @@ class PhotoUpdateIn(BaseModel):
     description: str = Field(max_length=500)
     tags: Optional[List[str]] | None = None
     image_url_transform: Optional[str] = Field(max_length=255, default=None)
-    
+
     @model_validator(mode="before")
     @classmethod
     def validate_to_json(cls, value):
@@ -149,4 +162,3 @@ class TransformationInput(BaseModel):
                 "angle": 45,
             }
         }
-
