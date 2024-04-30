@@ -8,20 +8,6 @@ from src.schemas.users import UserOut, RoleEnum
 router = APIRouter(prefix="/ratings", tags=["ratings"])
 
 
-@router.get("/{photo_id}/average", response_model=float)
-async def get_average_rating(
-        photo_id: int,
-        rating_repo: RatingRepository = Depends(get_rating_repository)):
-    """
-    Get the average rating for a photo.
-    """
-    average_rating = await rating_repo.calculate_average_rating(photo_id)
-    if average_rating is None:
-        raise HTTPException(
-            status_code=404, detail="No ratings found for the photo")
-    return average_rating
-
-
 @router.post("/", response_model=RatingOut)
 async def create_rating(
         photo_id: int,

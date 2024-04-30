@@ -9,16 +9,6 @@ class RatingRepository:
     def __init__(self, db_session: Session) -> None:
         self._db = db_session
 
-    async def get_all_ratings(self, skip: int, limit: int) -> list[Rating]:
-        """
-        Retrieve all Ratings.
-
-        :param skip: The number of records to skip.
-        :param limit: The maximum number of records to retrieve.
-        :return: A list of Ratings objects.
-        """
-        return self._db.query(Rating).offset(skip).limit(limit).all()
-
     async def get_rating_by_id(self, rating_id: int) -> Optional[Rating]:
         """
         Retrieve a rating by its ID.
@@ -48,7 +38,6 @@ class RatingRepository:
         self._db.commit()
         self._db.refresh(new_rating)
         return new_rating
-
 
     async def delete_rating(self, rating_id: int, user_role: RoleEnum, user_id: int) -> bool:
         """
@@ -93,16 +82,3 @@ class RatingRepository:
         :return: The rating given by the user for the photo, if it exists.
         """
         return self._db.query(Rating).filter(Rating.photo_id == photo_id, Rating.user_id == user_id).first()
-
-    async def calculate_average_rating(self, photo_id: int) -> Optional[float]:
-        """
-        Calculate the average rating for a photo.
-
-        :param photo_id: Photo ID.
-        :return: The average rating, or None if there are no ratings for the photo.
-        """
-        ratings = await self.get_ratings_for_photo(photo_id)
-        if not ratings:
-            return None
-        total_ratings = sum(rating.rating for rating in ratings)
-        return total_ratings / len(ratings)
