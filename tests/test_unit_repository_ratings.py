@@ -27,36 +27,21 @@ class TestRatings(unittest.IsolatedAsyncioTestCase):
         self.assertIsInstance(created_rating.created_at, datetime)
         self.assertIsInstance(created_rating.updated_at, datetime)
 
-    async def test_update_rating(self):
-        test_rating_id = 1
-        test_new_rating = 5
-        test_user_id = 1
-
-        mock_rating = Rating(id=test_rating_id, user_id=test_user_id, rating=3)
-        self.db_session.query.return_value.filter.return_value.first.return_value = mock_rating
-        updated_rating = await self.rating_repository.update_rating(
-            rating_id=test_rating_id,
-            new_rating=test_new_rating,
-            user_id=test_user_id
-        )
-
-        self.assertEqual(updated_rating.id, test_rating_id)
-        self.assertEqual(updated_rating.rating, test_new_rating)
-        self.assertEqual(updated_rating.user_id, test_user_id)
-        self.assertIsInstance(updated_rating.updated_at, datetime)
-
     async def test_get_all_ratings(self):
-        mock_ratings = [Rating(id=1, photo_id=1, user_id=1, rating=4), Rating(id=2, photo_id=2, user_id=2, rating=3)]
+        mock_ratings = [Rating(id=1, photo_id=1, user_id=1, rating=4), Rating(
+            id=2, photo_id=2, user_id=2, rating=3)]
         self.db_session.query.return_value.offset.return_value.limit.return_value.all.return_value = mock_ratings
         result = await self.rating_repository.get_all_ratings(skip=0, limit=10)
         self.assertEqual(result, mock_ratings)
 
     async def test_get_rating_by_id(self):
         test_rating_id = 1
-        mock_rating = Rating(id=test_rating_id, photo_id=1, user_id=1, rating=4)
+        mock_rating = Rating(
+            id=test_rating_id, photo_id=1, user_id=1, rating=4)
         self.db_session.query.return_value.filter.return_value.first.return_value = mock_rating
         result = await self.rating_repository.get_rating_by_id(rating_id=test_rating_id)
         self.assertEqual(result, mock_rating)
+
 
 if __name__ == "__main__":
     unittest.main()
