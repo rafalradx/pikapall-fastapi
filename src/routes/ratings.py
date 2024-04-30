@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 from src.repository.ratings import RatingRepository
 from dependencies import get_rating_repository
-from src.schemas.ratings import Rating
+from src.schemas.photo import RatingOut
 from src.services.auth_user import get_current_user
 from src.schemas.users import UserOut, RoleEnum
 
@@ -22,7 +22,7 @@ async def get_average_rating(
     return average_rating
 
 
-@router.post("/", response_model=Rating)
+@router.post("/", response_model=RatingOut)
 async def create_rating(
         photo_id: int,
         rating: int,
@@ -42,7 +42,7 @@ async def create_rating(
     return await rating_repo.create_rating(photo_id, current_user.id, rating)
 
 
-@router.put("/{rating_id}", response_model=Rating)
+@router.put("/{rating_id}", response_model=RatingOut)
 async def update_rating(
         rating_id: int,
         new_rating: int,
@@ -70,7 +70,7 @@ async def update_rating(
     return updated_rating
 
 
-@router.delete("/{rating_id}", response_model=Rating)
+@router.delete("/{rating_id}", response_model=RatingOut)
 async def delete_rating(
         rating_id: int,
         rating_repo: RatingRepository = Depends(get_rating_repository),
