@@ -31,6 +31,11 @@ async def create_rating(
     """
     Create a new rating for a photo.
     """
+    existing_rating = await rating_repo.get_user_rating_for_photo(photo_id, current_user.id)
+    if existing_rating:
+        raise HTTPException(
+            status_code=400, detail="You have already rated this photo")
+
     if rating < 1 or rating > 5:
         raise HTTPException(
             status_code=400, detail="Rating must be between 1 and 5")
