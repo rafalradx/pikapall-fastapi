@@ -48,6 +48,7 @@ class Photo(Base):
     user = relationship("User", backref="photos")
     tags = relationship("Tag", secondary="photo_m2m_tags", backref="photos")
     comments = relationship("Comment", backref="photo")
+    ratings = relationship("Rating", backref="photo")
 
 
 class User(Base):
@@ -65,6 +66,7 @@ class User(Base):
         DateTime(timezone=True), server_default=func.now())
     refresh_token = Column(String(255), nullable=True)
     comments = relationship("Comment", backref="user")
+    ratings = relationship("Rating", backref="user")
 
 
 # Model tagu
@@ -112,15 +114,9 @@ class Rating(Base):
     user_id = Column(
         Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
-    rating = Column(Integer, nullable=False)
+    rating = Column(Integer, nullable=False, default=1)
     created_at = Column(DateTime, server_default=func.now())
-    updated_at = Column(DateTime, server_default=func.now(),
-                        onupdate=func.now())
-
-    UniqueConstraint("photo_id", "user_id", name="unique_photo_rating")
-
-    photo = relationship("Photo", back_populates="ratings")
-    user = relationship("User", back_populates="ratings")
+    updated_at = Column(DateTime, onupdate=func.now())
 
 # class QRCode(Base):
 #     __tablename__ = 'qr_codes'
