@@ -23,7 +23,8 @@ class PhotoRepository:
         :return: The newly created Photo object.
         """
         tags = self.db.query(Tag).filter(Tag.id.in_(photo_data.tags)).all()
-        new_photo = Photo(description=photo_data.description, tags=tags, image_url=photo_data.image_url, user_id=user_id)
+        new_photo = Photo(description=photo_data.description, tags=tags,
+                          image_url=photo_data.image_url, user_id=user_id)
         self.db.add(new_photo)
         self.db.commit()
         self.db.refresh(new_photo)
@@ -56,8 +57,7 @@ class PhotoRepository:
             existing_photo.tags = tags
             existing_photo.image_url_transform = photo_data.image_url_transform
             self.db.commit()
-        return existing_photo  
-
+        return existing_photo
 
     async def delete_photo(self, photo_id: int, user_id: int) -> PhotoOut:
         """
@@ -89,7 +89,7 @@ class PhotoRepository:
         :param tag: The tag to search for.
         :return: A list of Photo objects containing the specified tag.
         """
-        return self.db.query(Photo).filter(Photo.tags.contains(tag)).all()
+        return self.db.query(Photo).filter(Photo.tags.any(Tag.name == tag)).all()
 
     async def filter_photos(
         self,
@@ -109,7 +109,7 @@ class PhotoRepository:
         """
         query = self.db.query(Photo)
         if tag:
-            query = query.filter(Photo.tags.contains(tag))
+            query = query.filter(Photo.tags.any(Tag.name == tag))
         if start_date:
             query = query.filter(Photo.created_at >= start_date)
         if end_date:
