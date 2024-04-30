@@ -11,7 +11,7 @@ from sqlalchemy import (
     Text,
     UniqueConstraint,
     DateTime,
-    Float
+    Float,
 )
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.schema import ForeignKey
@@ -45,7 +45,6 @@ class Photo(Base):
     description = Column(Text)
     image_url = Column(String(255), nullable=False)
     image_url_transform = Column(String(255), nullable=True)
-    # qr_code_url = Column(String(255))  # QRcode
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     user = relationship("User", backref="photos")
     tags = relationship("Tag", secondary="photo_m2m_tags", backref="photos")
@@ -73,14 +72,12 @@ class User(Base):
         Enum("standard", "moderator", "administrator", name="role_types"),
         nullable=False,
     )
-    registration_date = Column(
-        DateTime(timezone=True), server_default=func.now())
+    registration_date = Column(DateTime(timezone=True), server_default=func.now())
     refresh_token = Column(String(255), nullable=True)
     comments = relationship("Comment", backref="user")
     ratings = relationship("Rating", backref="user")
 
 
-# Model tagu
 class Tag(Base):
     __tablename__ = "tags"
     id = Column(Integer, primary_key=True)
@@ -102,19 +99,6 @@ class Comment(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
 
-# # Tabela łącznikowa dla relacji Zdjęcie-Tagi
-# class PhotoTag(Base):
-#     __tablename__ = "photo_tags"
-
-#     photo_id = Column(
-#         Integer, ForeignKey("photos.id", ondelete="CASCADE"), primary_key=True
-#     )
-#     tag_id = Column(
-#         Integer, ForeignKey("tags.id", ondelete="CASCADE"), primary_key=True
-#     )
-
-#     UniqueConstraint("photo_id", "tag_id", name="unique_photo_tag")
-
 class Rating(Base):
     __tablename__ = "ratings"
 
@@ -128,12 +112,3 @@ class Rating(Base):
     rating = Column(Integer, nullable=False, default=1)
     # created_at = Column(DateTime, server_default=func.now())
     # updated_at = Column(DateTime, onupdate=func.now())
-
-# class QRCode(Base):
-#     __tablename__ = 'qr_codes'
-#
-#     id = Column(Integer, primary_key=True)
-#     photo_id = Column(Integer, ForeignKey('photos.id', ondelete='CASCADE'), unique=True)
-#     qr_code_url = Column(String(255), nullable=False)
-#
-#     photo = relationship("Photo", back_populates="qr_code")
