@@ -1,9 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 from src.repository.ratings import RatingRepository
 from dependencies import get_rating_repository
-
 from src.schemas.photo import RatingOut
-
 from src.services.auth_user import get_current_user
 from src.schemas.users import UserOut, RoleEnum
 
@@ -41,7 +39,7 @@ async def create_rating(
     if rating < 1 or rating > 5:
         raise HTTPException(
             status_code=400, detail="Rating must be between 1 and 5")
-    created_rating =  await rating_repo.create_rating(photo_id, current_user.id, rating)
+    created_rating = await rating_repo.create_rating(photo_id, current_user.id, rating)
     return created_rating
 
 
