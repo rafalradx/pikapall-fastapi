@@ -70,6 +70,7 @@ uvicorn = "==0.29.0"
 coverage = {extras = ["toml"], version = "==7.5.0"}
 pydantic = {extras = ["email"], version = "==2.7.1"}
 python-jose = {extras = ["cryptography"], version = "==3.3.0"}
+qrcode = "*"
 
 [dev-packages]
 

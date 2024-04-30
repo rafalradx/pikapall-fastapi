@@ -1,12 +1,26 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
-from src.schemas.photo import PhotoCreate, PhotoIn, PhotoOut, PhotoUpdateIn, PhotoUpdateOut,TransformationInput
-from dependencies import get_image_provider, get_tags_repository, get_photos_repository, PhotoRepository
+from src.schemas.photo import (
+    PhotoCreate,
+    PhotoIn,
+    PhotoOut,
+    PhotoUpdateIn,
+    PhotoUpdateOut,
+    TransformationInput,
+)
+from dependencies import (
+    get_image_provider,
+    get_tags_repository,
+    get_photos_repository,
+    PhotoRepository,
+)
 from src.schemas.users import UserOut
 from src.services.auth_user import get_current_user
 from src.services.cloudinary_tr import CloudinaryImageProvider
 from src.services.abstract import AbstractImageProvider
 from src.repository.tags import TagRepository
-
+import io
+import qrcode
+from fastapi.responses import StreamingResponse
 
 router = APIRouter(prefix="/photos", tags=["photos"])
 
@@ -49,6 +63,7 @@ async def create_photo(
 @router.get("/", response_model=list[PhotoOut], summary="Get all photos")
 async def get_all_photos(
     photos_repository: PhotoRepository = Depends(get_photos_repository),
+    current_user: UserOut = Depends(get_current_user),
 ):
     """
     Get all photos.
@@ -64,7 +79,10 @@ async def get_all_photos(
 
 @router.get("/{photo_id}", response_model=PhotoOut, summary="Get a photo by ID")
 async def get_photo_by_id(
-    photo_id: int, photos_repository: PhotoRepository = Depends(get_photos_repository)
+    photo_id: int,
+    qr_code: bool = False,
+    photos_repository: PhotoRepository = Depends(get_photos_repository),
+    current_user: UserOut = Depends(get_current_user),
 ):
     """
     Get a photo by ID.
@@ -73,9 +91,21 @@ async def get_photo_by_id(
     :param db: Database session.
     :return: Retrieved photo.
     """
+
     photo = await photos_repository.get_photo_by_id(photo_id)
     if not photo:
         raise HTTPException(status_code=404, detail="Photo not found.")
+
+    if qr_code:
+        url = photo.image_url
+        if photo.image_url_transform:
+            url = photo.image_url_transform
+        img = qrcode.make(url)
+        buf = io.BytesIO()
+        img.save(buf)
+        buf.seek(0)  # important here!
+        return StreamingResponse(buf, media_type="image/jpeg")
+
     return photo
 
 
@@ -104,7 +134,11 @@ async def update_photo(
         if tag is None:
             tag = await tags_repository.create_tag(tag_name)
         photo_tags.append(tag.id)
-    data = PhotoUpdateOut(description=photo_data.description, tags=photo_tags, image_url_transform=photo_data.image_url_transform)
+    data = PhotoUpdateOut(
+        description=photo_data.description,
+        tags=photo_tags,
+        image_url_transform=photo_data.image_url_transform,
+    )
     updated_photo = await photos_repository.update_photo(
         photo_id, data, current_user.id
     )
