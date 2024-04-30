@@ -23,8 +23,13 @@ class CommentIn(BaseModel):
     updated_at: datetime
 
 
-class CommentOut(CommentIn):
+class CommentOut(BaseModel):
     id: int
+    content: str = Field(max_length=255)
+    photo_id: int
+    user_id: int
+    created_at: datetime
+    updated_at: datetime
 
     class Config:
         from_attributes = True
@@ -36,6 +41,19 @@ class CommentDisplay(BaseModel):
     created_at: datetime
     updated_at: datetime
 
+class Rating(BaseModel):
+    id: int
+    photo_id: int
+    user_id: int
+    rating: int
+    # created_at: datetime
+    # updated_at: datetime
+
+    class Config:
+        orm_mode = True
+
+class RatingAvg(BaseModel):
+    rating: Optional[float] | None = None
 
 class PhotoIn(BaseModel):
     description: str = Field(max_length=500)
@@ -44,7 +62,6 @@ class PhotoIn(BaseModel):
     @model_validator(mode="before")
     @classmethod
     def validate_to_json(cls, value):
-        print(value)
         if isinstance(value, str):
             return cls(**json.loads(value))
         return value
@@ -75,7 +92,9 @@ class PhotoOut(BaseModel):
     image_url_transform: Optional[str] = Field(max_length=255)
     user_id: int
     created_at: datetime
+    ratings: Optional[RatingAvg]
     comments: Optional[List[CommentDisplay]]
+    
 
     class Config:
         from_attributes = True
@@ -89,7 +108,6 @@ class PhotoUpdateIn(BaseModel):
     @model_validator(mode="before")
     @classmethod
     def validate_to_json(cls, value):
-        print(value)
         if isinstance(value, str):
             return cls(**json.loads(value))
         return value
@@ -105,6 +123,7 @@ class PhotoUpdateOut(BaseModel):
     description: str = Field(max_length=500)
     tags: Optional[List[int]] | None = None
     image_url_transform: Optional[str] = Field(max_length=255, default=None)
+
 
     @validator("tags")
     def validate_tags(cls, tags):

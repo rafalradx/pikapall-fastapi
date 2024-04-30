@@ -48,20 +48,6 @@ class RatingRepository:
         self._db.refresh(new_rating)
         return new_rating
 
-    async def update_rating(self, rating_id: int, new_rating: int):
-        """
-        Update an existing rating.
-
-        :param rating_id: The ID of the rating to update.
-        :param new_rating: The new rating value.
-        :return: The updated rating.
-        """
-        rating = self._db.query(Rating).filter(Rating.id == rating_id).first()
-        if rating:
-            rating.rating = new_rating
-            rating.updated_at = datetime.now()
-            self._db.commit()
-        return rating
 
     async def delete_rating(self, rating_id: int) -> Optional[Rating]:
         """
