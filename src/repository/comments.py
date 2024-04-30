@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from src.database.models import Comment
 from datetime import datetime
 from src.schemas.users import RoleEnum
+from typing import Optional
 
 
 class CommentsRepository:
@@ -49,7 +50,7 @@ class CommentsRepository:
             return comment
         return None
 
-    async def delete_comment(self, comment_id: int, user_role: RoleEnum):
+    async def delete_comment(self, comment_id: int, user_role: RoleEnum) -> Optional[Comment]:
         """
         Function to remove a comment.
 
@@ -63,7 +64,7 @@ class CommentsRepository:
             if comment:
                 self._db.delete(comment)
                 self._db.commit()
-                return True
+                return comment
         return False
 
     async def get_comments_for_photo(self, photo_id: int):
