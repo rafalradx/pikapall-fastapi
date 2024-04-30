@@ -41,19 +41,6 @@ class CommentDisplay(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-class Rating(BaseModel):
-    id: int
-    photo_id: int
-    user_id: int
-    rating: int
-    # created_at: datetime
-    # updated_at: datetime
-
-    class Config:
-        orm_mode = True
-
-class RatingAvg(BaseModel):
-    rating: Optional[float] | None = None
 
 class RatingIn(BaseModel):
     photo_id: int
@@ -68,6 +55,7 @@ class RatingOut(RatingIn):
 
     class Config:
         from_attributes = True
+
 
 class PhotoIn(BaseModel):
     description: str = Field(max_length=500)
@@ -106,7 +94,7 @@ class PhotoOut(BaseModel):
     image_url_transform: Optional[str] = Field(max_length=255)
     user_id: int
     created_at: datetime
-    average_rating: Optional[RatingAvg]
+    average_rating: Optional[float]
     comments: Optional[List[CommentDisplay]]
 
     class Config:
@@ -136,7 +124,6 @@ class PhotoUpdateOut(BaseModel):
     description: str = Field(max_length=500)
     tags: Optional[List[int]] | None = None
     image_url_transform: Optional[str] = Field(max_length=255, default=None)
-
 
     @validator("tags")
     def validate_tags(cls, tags):
