@@ -11,6 +11,7 @@ from sqlalchemy import (
     Text,
     UniqueConstraint,
     DateTime,
+    Float
 )
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.schema import ForeignKey
@@ -44,6 +45,7 @@ class Photo(Base):
     description = Column(Text)
     image_url = Column(String(255), nullable=False)
     image_url_transform = Column(String(255), nullable=True)
+    average_rating = Column(Float)
     # qr_code_url = Column(String(255))  # QRcode
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     user = relationship("User", backref="photos")
