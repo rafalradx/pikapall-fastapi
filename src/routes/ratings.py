@@ -3,7 +3,7 @@ from src.repository.ratings import RatingRepository
 from dependencies import get_rating_repository
 from src.schemas.ratings import Rating
 from src.services.auth_user import get_current_user
-from src.schemas.users import UserOut
+from src.schemas.users import UserOut, RoleEnum
 
 router = APIRouter(prefix="/ratings", tags=["ratings"])
 
@@ -51,10 +51,23 @@ async def update_rating(
     """
     Update an existing rating.
     """
-    rating = await rating_repo.update_rating(rating_id, new_rating)
-    if not rating:
+    existing_rating = await rating_repo.get_rating_by_id(rating_id)
+    if not existing_rating:
         raise HTTPException(status_code=404, detail="Rating not found")
-    return rating
+
+    if existing_rating.user_id != current_user.id:
+        raise HTTPException(
+            status_code=403, detail="You are not allowed to update this rating")
+
+    if new_rating < 1 or new_rating > 5:
+        raise HTTPException(
+            status_code=400, detail="Rating must be between 1 and 5")
+
+    updated_rating = await rating_repo.update_rating(rating_id, new_rating, current_user.id)
+    if not updated_rating:
+        raise HTTPException(status_code=404, detail="Rating not found")
+
+    return updated_rating
 
 
 @router.delete("/{rating_id}", response_model=Rating)
@@ -65,7 +78,16 @@ async def delete_rating(
     """
     Delete a rating.
     """
-    rating = await rating_repo.delete_rating(rating_id)
-    if not rating:
+    existing_rating = await rating_repo.get_rating_by_id(rating_id)
+    if not existing_rating:
         raise HTTPException(status_code=404, detail="Rating not found")
-    return rating
+
+    if existing_rating.user_id != current_user.id and current_user.role not in [RoleEnum.admin, RoleEnum.mod]:
+        raise HTTPException(
+            status_code=403, detail="You are not allowed to delete this rating")
+
+    deleted = await rating_repo.delete_rating(rating_id, current_user.role, current_user.id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Rating not found")
+
+    return existing_rating
