@@ -19,7 +19,7 @@ async def read_all_tags(
     return tags
 
 
-@router.get("/id/{tag_id}", response_model=TagOut)
+@router.get("/{tag_id}", response_model=TagOut)
 async def read_tag_by_id(
     tag_id: int,
     tags_repository: TagRepository = Depends(get_tags_repository),
@@ -33,7 +33,7 @@ async def read_tag_by_id(
     return tag
 
 
-@router.get("/name/{tag_name}", response_model=TagOut)
+@router.get("/{tag_name}", response_model=TagOut)
 async def read_tag_by_name(
     tag_name: str,
     tags_repository: TagRepository = Depends(get_tags_repository),
