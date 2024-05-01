@@ -3,7 +3,7 @@ from src.database.models import Photo, Tag
 from src.schemas.photo import PhotoCreate, PhotoUpdateOut, PhotoOut
 from typing import List
 from src.repository.tags import TagRepository
-
+from src.services.cloudinary_tr import delete_transformed_image_url
 
 class PhotoRepository:
     def __init__(self, db: Session):
@@ -70,6 +70,7 @@ class PhotoRepository:
         existing_photo = await self.get_photo_by_id(photo_id)
         if not existing_photo:
             return None
+        delete_transformed_image_url(self.db, photo_id)
         self.db.delete(existing_photo)
         self.db.commit()
         return existing_photo

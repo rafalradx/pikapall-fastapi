@@ -3,6 +3,9 @@ import cloudinary.uploader
 from fastapi import UploadFile
 from src.services.abstract import AbstractImageProvider
 from src.schemas.users import UserOut
+from src.database.models import Photo
+from src.schemas.photo import TransformationInput
+from sqlalchemy.orm import Session
 
 
 class CloudinaryImageProvider(AbstractImageProvider):
@@ -14,16 +17,56 @@ class CloudinaryImageProvider(AbstractImageProvider):
         )
 
     def upload(self, file: UploadFile, current_user: UserOut):
+        """
+        Uploads the file to Cloudinary and saves the transformed image URL.
+
+        :param file: The file to upload.
+        :param current_user: The current user.
+        :return: Transformed image URL.
+        """
         client = cloudinary.uploader.upload(
             file.file, public_id=f"PikaPall/{current_user.username}", overwrite=True
         )
         src_url = cloudinary.CloudinaryImage(
             f"PikaPall/{current_user.username}"
         ).build_url(width=250, height=250, crop="fill", version=client.get("version"))
+
         return src_url
 
-    def transform(self, url, transform):
-        return "not working yet"
+    def transform(self, url, transform: TransformationInput):
+        """
+        Apply transformation to an image.
+
+        :param url: URL of the image.
+        :param transform: Transformation parameters.
+        :return: Transformed image URL.
+        """
+
+        transformation = {
+            "width": transform.width,
+            "height": transform.height,
+            "crop": transform.crop,
+            "effect": transform.effect,
+            "angle": transform.angle
+        }
+
+        transformed_image = cloudinary.CloudinaryImage(url).build_url(**transformation)
+
+        return transformed_image
+
+    def delete_transformed_image_url(db: Session, photo_id: int):
+        """
+        Usuwa link transformowanego obrazu z pola 'image_url_transform' w modelu Photo.
+
+        :param db: Sesja bazy danych.
+        :param photo_id: ID zdjęcia, dla którego ma zostać usunięty link transformowanego obrazu.
+        """
+        photo = db.query(Photo).filter(Photo.id == photo_id).first()
+        if photo:
+            photo.image_url_transform = None
+            db.commit()
+            return True
+        return False
 
     # def apply_transformation(db_session, photo_id, transformation):
     #     photo = db_session.query(Photo).filter(Photo.id == photo_id).first()
