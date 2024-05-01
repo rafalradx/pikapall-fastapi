@@ -63,9 +63,9 @@ async def delete_comment(
 async def get_comments_for_photo(
     photo_id: int,
     comments_repo: CommentsRepository = Depends(get_comments_repository),
+    current_user: UserOut = Depends(get_current_user),
 ):
     comments = await comments_repo.get_comments_for_photo(photo_id)
     if not comments:
         raise HTTPException(status_code=404, detail="No comments found.")
     return comments
-    

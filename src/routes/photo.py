@@ -222,6 +222,7 @@ async def transform_photo(
     trans_body: TransformationInput,
     photos_repository: PhotoRepository = Depends(get_photos_repository),
     image_provider: AbstractImageProvider = Depends(get_image_provider),
+    current_user: UserOut = Depends(get_current_user),
 ):
     """
     Apply transformation to a photo by ID.
