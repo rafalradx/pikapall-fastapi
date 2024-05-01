@@ -42,9 +42,6 @@ class HandleJWT:
         :rtype: str
         """
         to_encode = data.copy()
-        # if expires_delta:
-        #     expire = datetime.now(timezone.utc) + timedelta(seconds=expires_delta)
-        # else:
         expire = datetime.now(timezone.utc) + timedelta(
             minutes=self._acc_token_expire_minutes
         )
@@ -73,9 +70,6 @@ class HandleJWT:
         :rtype: str
         """
         to_encode = data.copy()
-        # if expires_delta:
-        #     expire = datetime.now(timezone.utc) + timedelta(seconds=expires_delta)
-        # else:
         expire = datetime.now(timezone.utc) + timedelta(
             days=self._ref_token_expire_days
         )
