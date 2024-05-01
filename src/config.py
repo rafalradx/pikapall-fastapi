@@ -5,6 +5,8 @@ class Settings(BaseSettings):
     sqlalchemy_database_url: str
     jwt_secret_key: str
     jwt_algorithm: str
+    jwt_expire_minutes: int
+    jwt_ref_expire_days: int
     redis_host: str
     redis_port: int
     postgres_db: str
