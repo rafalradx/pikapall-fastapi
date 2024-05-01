@@ -23,7 +23,7 @@ async def read_all_tags(
 async def read_tag_by_id(
     tag_id: int,
     tags_repository: TagRepository = Depends(get_tags_repository),
-    # current_user: UserOut = Depends(get_current_user),
+    current_user: UserOut = Depends(get_current_user),
 ):
     tag = await tags_repository.get_tag_by_id(tag_id)
     if tag is None:
@@ -37,7 +37,7 @@ async def read_tag_by_id(
 async def read_tag_by_name(
     tag_name: str,
     tags_repository: TagRepository = Depends(get_tags_repository),
-    # current_user: UserOut = Depends(get_current_user),
+    current_user: UserOut = Depends(get_current_user),
 ):
     tag = await tags_repository.get_tag_by_name(tag_name)
     if tag is None:
