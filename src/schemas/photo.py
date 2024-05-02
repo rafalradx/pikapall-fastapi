@@ -15,14 +15,6 @@ class TagOut(TagIn):
         from_attributes = True
 
 
-class CommentIn(BaseModel):
-    content: str = Field(max_length=255)
-    photo_id: int
-    user_id: int
-    created_at: datetime
-    updated_at: datetime
-
-
 class CommentOut(BaseModel):
     id: int
     content: str = Field(max_length=255)
@@ -36,7 +28,7 @@ class CommentOut(BaseModel):
 
 
 class CommentDisplay(BaseModel):
-    user: str
+    user_id: int
     content: str
     created_at: datetime
     updated_at: datetime
@@ -95,7 +87,7 @@ class PhotoOut(BaseModel):
     user_id: int
     created_at: datetime
     average_rating: Optional[float]
-    comments: Optional[List[CommentDisplay]]
+    comments: Optional[List[CommentDisplay]] | None = None
 
     class Config:
         from_attributes = True
@@ -104,7 +96,6 @@ class PhotoOut(BaseModel):
 class PhotoUpdateIn(BaseModel):
     description: str = Field(max_length=500)
     tags: Optional[List[str]] | None = None
-    # image_url_transform: Optional[str] = Field(max_length=255, default=None)
 
     @model_validator(mode="before")
     @classmethod
@@ -123,7 +114,6 @@ class PhotoUpdateIn(BaseModel):
 class PhotoUpdateOut(BaseModel):
     description: str = Field(max_length=500)
     tags: Optional[List[int]] | None = None
-    # image_url_transform: Optional[str] = Field(max_length=255, default=None)
 
     @validator("tags")
     def validate_tags(cls, tags):

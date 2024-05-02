@@ -3,6 +3,7 @@ from src.database.models import User
 from src.schemas.users import UserIn, UserOut, UserChangeRole
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
+from src.schemas.users import RoleEnum
 
 
 class UserRepository(AbstractUserRepository):
@@ -61,9 +62,9 @@ class UserRepository(AbstractUserRepository):
         user = await self.get_first_user()
         # if users table is empty create administrator
         if not user:
-            user_role = "administrator"
+            user_role = RoleEnum.admin
         else:
-            user_role = "standard"
+            user_role = RoleEnum.user
         new_user = User(**new_user.model_dump())
         new_user.role = user_role
         self._session.add(new_user)
@@ -72,7 +73,7 @@ class UserRepository(AbstractUserRepository):
         return new_user
 
     async def change_user_role(
-        self, email: str, body: UserChangeRole
+        self, user_id: int, role: RoleEnum
     ) -> UserOut | None:
         """
         Retrieve a first user from the database.
@@ -83,16 +84,9 @@ class UserRepository(AbstractUserRepository):
         :return: A UserOut object representing the retrieved user.
         :rtype: UserOut
         """
-        user = await self.get_user_by_email(email)
-        if user:
-            if body.role:
-                try:
-                    user.role = body.role
-                except:
-                    raise HTTPException(
-                        status_code=422,
-                        detail="You should use one of these roles: 'standard', 'moderator', 'administrator'.",
-                    )
+        user = await self.get_user_by_id(user_id)
+        if role.value:
+                user.role = role.value
         self._session.commit()
         self._session.refresh(user)
         return user
