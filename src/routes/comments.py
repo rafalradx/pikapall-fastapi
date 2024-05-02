@@ -33,7 +33,8 @@ async def update_comment(
 
     if existing_comment.user_id != current_user.id:
         raise HTTPException(
-            status_code=403, detail="You do not have permission to edit other users' comments."
+            status_code=403,
+            detail="You do not have permission to edit other users' comments.",
         )
     updated_comment = await comments_repo.update_comment(
         comment_id, current_user.id, new_content
@@ -42,8 +43,7 @@ async def update_comment(
     return updated_comment
 
 
-
-@router.delete("/{comment_id}", response_model=CommentOut, status_code=204)
+@router.delete("/{comment_id}", response_model=CommentOut, status_code=200)
 async def delete_comment(
     comment_id: int,
     comments_repo: CommentsRepository = Depends(get_comments_repository),
@@ -52,14 +52,14 @@ async def delete_comment(
     if current_user.role not in [RoleEnum.admin, RoleEnum.mod]:
         raise HTTPException(
             status_code=403, detail="Only admins and mods can delete comments."
-          
-    comment = await comments_repo.get_comment(comment_id)
+        )
+
+    comment = await comments_repo.get_comment_by_id(comment_id)
     if not comment:
         raise HTTPException(status_code=404, detail="No comment found.")
-          
+
     await comments_repo.delete_comment(comment_id, current_user.role)
     return comment
-
 
 
 @router.get("/{photo_id}", response_model=list[CommentOut], status_code=200)
@@ -73,4 +73,3 @@ async def get_comments_for_photo(
     if not comments:
         raise HTTPException(status_code=404, detail="No comments found.")
     return comments
-
