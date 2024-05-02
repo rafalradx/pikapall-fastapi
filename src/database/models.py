@@ -43,6 +43,7 @@ class Photo(Base):
         Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
     description = Column(Text)
+    cloudinary_public_id = Column(String(255), nullable=False)
     image_url = Column(String(255), nullable=False)
     image_url_transform = Column(String(255), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())

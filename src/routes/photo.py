@@ -54,9 +54,12 @@ async def create_photo(
         if tag is None:
             tag = await tags_repository.create_tag(tag_name)
         photo_tags.append(tag.id)
-    photo_url = image_provider.upload(file, current_user)
+    (photo_url, public_id) = image_provider.upload(file, current_user)
     data = PhotoCreate(
-        description=photo_data.description, tags=photo_tags, image_url=photo_url
+        description=photo_data.description,
+        tags=photo_tags,
+        image_url=photo_url,
+        cloudinary_public_id=public_id,
     )
     new_photo = await photos_repository.create_photo(data, current_user.id)
     return new_photo
@@ -171,8 +174,9 @@ async def delete_photo(
 
     if not deleted_photo:
         raise HTTPException(status_code=404, detail="Photo not found.")
-    # image_provider.delete_image(deleted_photo.image_url)
-    # image_provider.delete_image(deleted_photo.image_url_transform)
+    image_provider.delete(deleted_photo.image_url)
+    if deleted_photo.image_url_transform:
+        image_provider.delete(deleted_photo.image_url_transform)
     return deleted_photo
 
 
@@ -224,23 +228,29 @@ async def filter_photos(
     summary="Apply transformation to a photo by ID",
 )
 async def transform_photo(
-    id: int,
+    photo_id: int,
     trans_body: TransformationInput,
     photos_repository: PhotoRepository = Depends(get_photos_repository),
     image_provider: AbstractImageProvider = Depends(get_image_provider),
     current_user: UserOut = Depends(get_current_user),
-):
+) -> PhotoOut:
     """
     Apply transformation to a photo by ID.
     """
-    photo = photos_repository.get_photo_by_id(photo_id=id)
+    photo = await photos_repository.get_photo_by_id(photo_id=photo_id)
+    if not photo:
+        raise HTTPException(status_code=404, detail="No photo found!")
+
+    if not photo.user_id == current_user.id:
+        raise HTTPException(
+            status_code=401, detail="You shall not change someone else's photo!"
+        )
+
     transformed_url = image_provider.transform(
-        url=photo.image_url, transform=trans_body
+        public_id=photo.cloudinary_public_id, transform=trans_body
     )
-    if transformed_url:
-        return {
-            "message": "Photo after applying the transformation:",
-            "transformed_url": transformed_url,
-        }
-    else:
-        raise HTTPException(status_code=404, detail="No photo found.")
+
+    trans_photo = await photos_repository.update_photo_trans_url(
+        photo_id=photo_id, url=transformed_url
+    )
+    return trans_photo
