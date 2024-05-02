@@ -1,7 +1,8 @@
 from sqlalchemy.orm import Session
+from fastapi import HTTPException
 from src.database.models import Photo, Tag
 from src.schemas.photo import PhotoCreate, PhotoUpdateOut, PhotoOut
-from typing import List
+from typing import List, Optional
 from src.repository.tags import TagRepository
 
 
@@ -23,8 +24,12 @@ class PhotoRepository:
         :return: The newly created Photo object.
         """
         tags = self.db.query(Tag).filter(Tag.id.in_(photo_data.tags)).all()
-        new_photo = Photo(description=photo_data.description, tags=tags,
-                          image_url=photo_data.image_url, user_id=user_id)
+        new_photo = Photo(
+            description=photo_data.description,
+            tags=tags,
+            image_url=photo_data.image_url,
+            user_id=user_id,
+        )
         self.db.add(new_photo)
         self.db.commit()
         self.db.refresh(new_photo)
@@ -41,7 +46,7 @@ class PhotoRepository:
 
     async def update_photo(
         self, photo_id: int, photo_data: PhotoUpdateOut, user_id: int
-    ) -> PhotoOut:
+    ) -> Optional[PhotoOut]:
         """
         Update a photo.
 
@@ -55,11 +60,15 @@ class PhotoRepository:
             tags = self.db.query(Tag).filter(Tag.id.in_(photo_data.tags)).all()
             existing_photo.description = photo_data.description
             existing_photo.tags = tags
-            existing_photo.image_url_transform = photo_data.image_url_transform
+            transformed_url = self.cloudinary_provider.transform(
+                existing_photo.image_url, photo_data.transformation
+            )
+            existing_photo.image_url_transform = transformed_url
             self.db.commit()
-        return existing_photo
+            return existing_photo
+        return None
 
-    async def delete_photo(self, photo_id: int, user_id: int) -> PhotoOut:
+    async def delete_photo(self, photo_id: int, user_id: int) -> Optional[PhotoOut]:
         """
         Delete a photo.
 
@@ -68,11 +77,24 @@ class PhotoRepository:
         :return: The deleted Photo object if found, otherwise None.
         """
         existing_photo = await self.get_photo_by_id(photo_id)
-        if not existing_photo:
+        if existing_photo:
+            if existing_photo.user_id == user_id:
+                self.db.delete(existing_photo)
+                try:
+                    self.db.commit()
+                    return existing_photo
+                except Exception as e:
+                    self.db.rollback()
+                    raise HTTPException(
+                        status_code=500, detail=f"Could not delete photo: {str(e)}"
+                    )
+            else:
+                raise HTTPException(
+                    status_code=403,
+                    detail="You don't have permission to delete this photo",
+                )
+        else:
             return None
-        self.db.delete(existing_photo)
-        self.db.commit()
-        return existing_photo
 
     async def get_all_photos(self) -> List[PhotoOut]:
         """

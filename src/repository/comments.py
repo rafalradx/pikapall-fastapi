@@ -51,22 +51,28 @@ class CommentsRepository:
             return comment
         return None
 
+
     async def delete_comment(self, comment_id: int, user_role: RoleEnum) -> Optional[CommentOut]:
+
         """
         Function to remove a comment.
 
         :param db: Database session.
         :param comment_id: The ID of the comment to be deleted.
+        :param user_id: The ID of the user deleting the comment.
         :param user_role: User role.
-        :return: True if the comment was successfully deleted, otherwise False.
+        :return: The deleted comment object if found, otherwise False.
         """
-        if user_role in [RoleEnum.admin, RoleEnum.mod]:
-            comment = self._db.query(Comment).filter(Comment.id == comment_id).first()
-            if comment:
-                self._db.delete(comment)
-                self._db.commit()
-                return comment
-        return False
+        comment = self._db.query(Comment).filter(Comment.id == comment_id).first()
+        if not comment:
+            return None
+
+        if comment.user_id != user_id and user_role not in [RoleEnum.admin, RoleEnum.mod]:
+            return None
+
+        self._db.delete(comment)
+        self._db.commit()
+        return comment
 
     async def get_comments_for_photo(self, photo_id: int) -> Optional[list[CommentDisplay]]:
         """
@@ -76,6 +82,7 @@ class CommentsRepository:
         :param photo_id: Photo ID.
         :return: List of comments for a given photo.
         """
+
         return self._db.query(Comment).filter(Comment.photo_id == photo_id).all()
     
     async def get_comment_by_id(self, comment_id: int) -> Optional[CommentOut]:
@@ -87,3 +94,4 @@ class CommentsRepository:
         :return: List of comments for a given photo.
         """
         return self._db.query(Comment).filter(Comment.id == comment_id).first()
+

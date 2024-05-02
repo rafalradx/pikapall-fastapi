@@ -15,7 +15,9 @@ from dependencies import (
 )
 from src.schemas.users import UserOut
 from src.services.auth_user import get_current_user
-from src.services.cloudinary_tr import CloudinaryImageProvider
+from src.services.cloudinary_tr import (
+    CloudinaryImageProvider,
+)
 from src.services.abstract import AbstractImageProvider
 from src.repository.tags import TagRepository
 import io
@@ -152,6 +154,7 @@ async def delete_photo(
     photo_id: int,
     current_user: UserOut = Depends(get_current_user),
     photos_repository: PhotoRepository = Depends(get_photos_repository),
+    image_provider: AbstractImageProvider = Depends(get_image_provider),
 ):
     """
     Delete a photo by ID.
@@ -165,8 +168,11 @@ async def delete_photo(
         raise HTTPException(status_code=401, detail="Unauthorized")
 
     deleted_photo = await photos_repository.delete_photo(photo_id, current_user.id)
+
     if not deleted_photo:
         raise HTTPException(status_code=404, detail="Photo not found.")
+    # image_provider.delete_image(deleted_photo.image_url)
+    # image_provider.delete_image(deleted_photo.image_url_transform)
     return deleted_photo
 
 
