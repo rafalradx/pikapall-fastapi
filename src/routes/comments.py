@@ -9,7 +9,7 @@ from dependencies import get_comments_repository
 router = APIRouter(prefix="/comments", tags=["comments"])
 
 
-@router.post("/comments/", status_code=201)
+@router.post("/", status_code=201)
 async def create_comment(
     photo_id: int,
     user_id: int,
@@ -24,7 +24,7 @@ async def create_comment(
     return await comments_repo.create_comment(photo_id, user_id, content)
 
 
-@router.put("/comments/{comment_id}/", status_code=200)
+@router.put("/{comment_id}", status_code=200)
 async def update_comment(
     comment_id: int,
     user_id: int,
@@ -44,7 +44,7 @@ async def update_comment(
     return updated_comment
 
 
-@router.delete("/comments/{comment_id}/", status_code=204)
+@router.delete("/{comment_id}", status_code=204)
 async def delete_comment(
     comment_id: int,
     user_role: RoleEnum,
@@ -59,13 +59,13 @@ async def delete_comment(
         raise HTTPException(status_code=404, detail="No comment found.")
 
 
-@router.get("/comments/{photo_id}/", response_model=list[CommentOut], status_code=200)
+@router.get("/{photo_id}", response_model=list[CommentOut], status_code=200)
 async def get_comments_for_photo(
     photo_id: int,
     comments_repo: CommentsRepository = Depends(get_comments_repository),
+    current_user: UserOut = Depends(get_current_user),
 ):
     comments = await comments_repo.get_comments_for_photo(photo_id)
     if not comments:
         raise HTTPException(status_code=404, detail="No comments found.")
     return comments
-    

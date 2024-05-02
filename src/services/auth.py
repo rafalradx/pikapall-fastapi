@@ -20,14 +20,15 @@ class HandleJWT:
         self,
         secret_key: str,
         algorithm: str,
+        acc_token_expire_minutes: int,
+        ref_token_expire_days: int,
     ) -> None:
         self._secret_key: str = secret_key
         self._algorithm: str = algorithm
+        self._acc_token_expire_minutes: int = acc_token_expire_minutes
+        self._ref_token_expire_days: int = ref_token_expire_days
 
-    # define a function to generate a new access token
-    async def create_access_token(
-        self, data: dict, expires_delta: Optional[float] = None
-    ):
+    async def create_access_token(self, data: dict):
         """
         Generate a new access token.
 
@@ -41,10 +42,10 @@ class HandleJWT:
         :rtype: str
         """
         to_encode = data.copy()
-        if expires_delta:
-            expire = datetime.now(timezone.utc) + timedelta(seconds=expires_delta)
-        else:
-            expire = datetime.now(timezone.utc) + timedelta(minutes=15)
+        expire = datetime.now(timezone.utc) + timedelta(
+            minutes=self._acc_token_expire_minutes
+        )
+
         to_encode.update(
             {"iat": datetime.now(timezone.utc), "exp": expire, "scope": "access_token"}
         )
@@ -53,7 +54,6 @@ class HandleJWT:
         )
         return encoded_access_token
 
-    # define a function to generate a new refresh token
     async def create_refresh_token(
         self, data: dict, expires_delta: Optional[float] = None
     ):
@@ -70,10 +70,9 @@ class HandleJWT:
         :rtype: str
         """
         to_encode = data.copy()
-        if expires_delta:
-            expire = datetime.now(timezone.utc) + timedelta(seconds=expires_delta)
-        else:
-            expire = datetime.now(timezone.utc) + timedelta(days=7)
+        expire = datetime.now(timezone.utc) + timedelta(
+            days=self._ref_token_expire_days
+        )
         to_encode.update(
             {"iat": datetime.now(timezone.utc), "exp": expire, "scope": "refresh_token"}
         )
@@ -168,7 +167,6 @@ class HandleJWT:
         :raises HTTPException: If the token is invalid or has an invalid scope.
         """
         try:
-            # Decode JWT
             payload = jwt.decode(token, self._secret_key, algorithms=[self._algorithm])
             if payload["scope"] == "access_token":
                 email = payload["sub"]
@@ -182,5 +180,8 @@ class HandleJWT:
 
 
 auth_service = HandleJWT(
-    secret_key=settings.jwt_secret_key, algorithm=settings.jwt_algorithm
+    secret_key=settings.jwt_secret_key,
+    algorithm=settings.jwt_algorithm,
+    acc_token_expire_minutes=settings.jwt_expire_minutes,
+    ref_token_expire_days=settings.jwt_ref_expire_days,
 )

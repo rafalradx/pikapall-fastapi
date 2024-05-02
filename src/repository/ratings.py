@@ -9,15 +9,6 @@ class RatingRepository:
     def __init__(self, db_session: Session) -> None:
         self._db = db_session
 
-    async def get_rating_by_id(self, rating_id: int) -> Optional[Rating]:
-        """
-        Retrieve a rating by its ID.
-
-        :param rating_id: The ID of the rating to retrieve.
-        :return: The rating object if found, else None.
-        """
-        return self._db.query(Rating).filter(Rating.id == rating_id).first()
-
     async def create_rating(self, photo_id: int, user_id: int, rating: int):
         """
         Function that creates a new rating for a photo.
@@ -31,8 +22,6 @@ class RatingRepository:
             photo_id=photo_id,
             user_id=user_id,
             rating=rating,
-            created_at=datetime.now(),
-            updated_at=datetime.now(),
         )
         self._db.add(new_rating)
         self._db.commit()
@@ -63,7 +52,25 @@ class RatingRepository:
                 self._db.commit()
                 return True
         return False
+    
+    
+    async def get_ratings(self) -> Optional[list[Rating]]:
+        """
+        Retrieve all ratings.
 
+        :return: The rating object if found, else None.
+        """
+        return self._db.query(Rating).filter().all()
+    
+    async def get_rating_by_id(self, rating_id: int) -> Optional[Rating]:
+        """
+        Retrieve a rating by its ID.
+
+        :param rating_id: The ID of the rating to retrieve.
+        :return: The rating object if found, else None.
+        """
+        return self._db.query(Rating).filter(Rating.id == rating_id).first()
+    
     async def get_ratings_for_photo(self, photo_id: int) -> Optional[list[Rating]]:
         """
         Retrieve all ratings for a photo.
@@ -72,6 +79,16 @@ class RatingRepository:
         :return: List of ratings for a given photo.
         """
         return self._db.query(Rating).filter(Rating.photo_id == photo_id).all()
+
+    async def get_user_ratings(self, user_id: int) -> Optional[list[Rating]]:
+        """
+        Retrieve the rating given by a user for a specific photo.
+
+        :param photo_id: Photo ID.
+        :param user_id: User ID.
+        :return: The rating given by the user for the photo, if it exists.
+        """
+        return self._db.query(Rating).filter(Rating.user_id == user_id).all()
 
     async def get_user_rating_for_photo(self, photo_id: int, user_id: int) -> Optional[Rating]:
         """
@@ -82,3 +99,4 @@ class RatingRepository:
         :return: The rating given by the user for the photo, if it exists.
         """
         return self._db.query(Rating).filter(Rating.photo_id == photo_id, Rating.user_id == user_id).first()
+
