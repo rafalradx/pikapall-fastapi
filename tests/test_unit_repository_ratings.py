@@ -81,6 +81,16 @@ class TestRatings(unittest.IsolatedAsyncioTestCase):
         result = await self.rating_repository.get_user_rating_for_photo(photo_id=999, user_id=1)
         self.assertIsNone(result)
 
+    async def test_get_user_rating_by_id_found(self):
+        mock_rating = Rating(id=1, photo_id=1, user_id=1, rating=4)
+        self.db_session.query.return_value.filter.return_value.first.return_value = mock_rating
+        result = await self.rating_repository.get_user_rating_by_id(rating_id=1, user_id=1)
+        self.assertEqual(result, mock_rating)
+
+    async def test_get_user_rating_by_id_not_found(self):
+        self.db_session.query.return_value.filter.return_value.first.return_value = None
+        result = await self.rating_repository.get_user_rating_by_id(rating_id=999, user_id=1)
+        self.assertIsNone(result)
 
 if __name__ == "__main__":
     unittest.main()

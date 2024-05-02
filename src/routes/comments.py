@@ -12,7 +12,6 @@ router = APIRouter(prefix="/comments", tags=["comments"])
 @router.post("/", status_code=201)
 async def create_comment(
     photo_id: int,
-    user_id: int,
     content: str,
     comments_repo: CommentsRepository = Depends(get_comments_repository),
     current_user: UserOut = Depends(get_current_user),
@@ -27,37 +26,40 @@ async def update_comment(
     comments_repo: CommentsRepository = Depends(get_comments_repository),
     current_user: UserOut = Depends(get_current_user),
 ):
-    updated_comment = await comments_repo.get_comment(comment_id)
-    if not updated_comment:
+
+    existing_comment = await comments_repo.get_comment_by_id(comment_id)
+    if not existing_comment:
         raise HTTPException(status_code=404, detail="No comment found.")
 
-    if updated_comment.user_id != current_user.id and current_user.role != RoleEnum.admin:
+    if existing_comment.user_id != current_user.id:
         raise HTTPException(
-            status_code=403,
-            detail="You don't have permission to update this comment.",
+            status_code=403, detail="You do not have permission to edit other users' comments."
         )
+    updated_comment = await comments_repo.update_comment(
+        comment_id, current_user.id, new_content
+    )
 
-    return await comments_repo.update_comment(comment_id, new_content)
+    return updated_comment
 
 
-@router.delete("/{comment_id}", status_code=204)
+
+@router.delete("/{comment_id}", response_model=CommentOut, status_code=204)
 async def delete_comment(
     comment_id: int,
     comments_repo: CommentsRepository = Depends(get_comments_repository),
     current_user: UserOut = Depends(get_current_user),
 ):
+    if current_user.role not in [RoleEnum.admin, RoleEnum.mod]:
+        raise HTTPException(
+            status_code=403, detail="Only admins and mods can delete comments."
+          
     comment = await comments_repo.get_comment(comment_id)
     if not comment:
         raise HTTPException(status_code=404, detail="No comment found.")
+          
+    await comments_repo.delete_comment(comment_id, current_user.role)
+    return comment
 
-    if comment.user_id != current_user.id and current_user.role != RoleEnum.admin:
-        raise HTTPException(
-            status_code=403,
-            detail="You don't have permission to delete this comment.",
-        )
-
-    await comments_repo.delete_comment(comment_id)
-    return None
 
 
 @router.get("/{photo_id}", response_model=list[CommentOut], status_code=200)

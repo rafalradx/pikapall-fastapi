@@ -8,7 +8,7 @@ from fastapi.requests import Request
 from src.repository.abstract import AbstractUserRepository
 from dependencies import get_users_repository, get_password_handler
 
-from src.schemas.users import UserChangeRole, UserIn, UserOut, Token
+from src.schemas.users import UserIn, UserOut, Token
 from src.services.auth import auth_service
 from src.services.auth_user import get_current_user
 from src.services.pwd_handler import AbstractPasswordHashHandler
@@ -107,23 +107,6 @@ async def login(
     refresh_token = await auth_service.create_refresh_token(data=payload)
     await users_repository.update_token(user, refresh_token)
     return Token(access_token=access_token, refresh_token=refresh_token)
-
-
-@router.get("/promote/{user_id}")
-async def promote_user(
-    user_id: int,
-    current_user: UserOut = Depends(get_current_user),
-    users_repository: AbstractUserRepository = Depends(get_users_repository),
-) -> UserOut:
-    if not current_user.role == "administrator":
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Only admin can do that"
-        )
-    user = await users_repository.get_user_by_id(user_id)
-    user_changed = await users_repository.change_user_role(
-        email=user.email, body=UserChangeRole(role="moderator")
-    )
-    return user_changed
 
 
 @router.get("/refresh_token")
