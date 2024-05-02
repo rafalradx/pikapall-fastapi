@@ -29,7 +29,7 @@ class CloudinaryImageProvider(AbstractImageProvider):
             "height": transform.height,
             "crop": transform.crop,
             "effect": transform.effect,
-            "angle": transform.angle
+            "angle": transform.angle,
         }
 
         transformed_image = cloudinary.CloudinaryImage(url).build_url(**transformation)
@@ -61,7 +61,6 @@ class CloudinaryImageProvider(AbstractImageProvider):
 
         :param public_id: Public ID of the image.
         """
-        # Usuwanie obrazu o podanym publicznym ID
         cloudinary.uploader.destroy(public_id, invalidate=True)
 
 

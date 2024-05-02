@@ -19,11 +19,11 @@ async def read_all_tags(
     return tags
 
 
-@router.get("/id/{tag_id}", response_model=TagOut)
+@router.get("/{tag_id}", response_model=TagOut)
 async def read_tag_by_id(
     tag_id: int,
     tags_repository: TagRepository = Depends(get_tags_repository),
-    # current_user: UserOut = Depends(get_current_user),
+    current_user: UserOut = Depends(get_current_user),
 ):
     tag = await tags_repository.get_tag_by_id(tag_id)
     if tag is None:
@@ -37,7 +37,7 @@ async def read_tag_by_id(
 async def read_tag_by_name(
     tag_name: str,
     tags_repository: TagRepository = Depends(get_tags_repository),
-    # current_user: UserOut = Depends(get_current_user),
+    current_user: UserOut = Depends(get_current_user),
 ):
     tag = await tags_repository.get_tag_by_name(tag_name)
     if tag is None:
@@ -60,11 +60,11 @@ async def create_tag(
 @router.put("/{tag_id}", response_model=TagOut)
 async def update_tag(
     tag_id: int,
-    body: str,
+    new_name: str,
     tags_repository: TagRepository = Depends(get_tags_repository),
     current_user: UserOut = Depends(get_current_user),
 ):
-    tag = await tags_repository.update_tag(tag_id, body)
+    tag = await tags_repository.update_tag(tag_id, new_name)
     if tag is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Tag not found."
