@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from src.database.models import Comment
 from datetime import datetime
 from src.schemas.users import RoleEnum
+from src.schemas.photo import CommentOut, CommentDisplay
 from typing import Optional
 
 
@@ -9,7 +10,7 @@ class CommentsRepository:
     def __init__(self, db_session: Session) -> None:
         self._db = db_session
 
-    async def create_comment(self, photo_id: int, user_id: int, content: str):
+    async def create_comment(self, photo_id: int, user_id: int, content: str) -> Optional[CommentOut]:
         """
         Function that creates a new comment for a photo.
 
@@ -31,7 +32,7 @@ class CommentsRepository:
         self._db.refresh(new_comment)
         return new_comment
 
-    async def update_comment(self, comment_id: int, user_id: int, new_content: str):
+    async def update_comment(self, comment_id: int, user_id: int, new_content: str) -> Optional[CommentOut]:
         """
         Function that updates the comment content.
 
@@ -50,7 +51,7 @@ class CommentsRepository:
             return comment
         return None
 
-    async def delete_comment(self, comment_id: int, user_role: RoleEnum) -> Optional[Comment]:
+    async def delete_comment(self, comment_id: int, user_role: RoleEnum) -> Optional[CommentOut]:
         """
         Function to remove a comment.
 
@@ -67,7 +68,7 @@ class CommentsRepository:
                 return comment
         return False
 
-    async def get_comments_for_photo(self, photo_id: int):
+    async def get_comments_for_photo(self, photo_id: int) -> Optional[list[CommentDisplay]]:
         """
         A function that returns all comments for a given photo.
 
@@ -76,3 +77,13 @@ class CommentsRepository:
         :return: List of comments for a given photo.
         """
         return self._db.query(Comment).filter(Comment.photo_id == photo_id).all()
+    
+    async def get_comment_by_id(self, comment_id: int) -> Optional[CommentOut]:
+        """
+        A function that returns all comments for a given photo.
+
+        :param db: Database session.
+        :param photo_id: Photo ID.
+        :return: List of comments for a given photo.
+        """
+        return self._db.query(Comment).filter(Comment.id == comment_id).first()
