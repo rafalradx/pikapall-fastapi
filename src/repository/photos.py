@@ -2,8 +2,9 @@ from sqlalchemy.orm import Session
 from src.database.models import Photo, Tag
 from src.schemas.photo import PhotoCreate, PhotoUpdateOut, PhotoOut
 from typing import List
+from src.services.cloudinary_tr import CloudinaryImageProvider
 from src.repository.tags import TagRepository
-from src.services.cloudinary_tr import delete_transformed_image_url
+
 
 class PhotoRepository:
     def __init__(self, db: Session):
@@ -55,7 +56,10 @@ class PhotoRepository:
             tags = self.db.query(Tag).filter(Tag.id.in_(photo_data.tags)).all()
             existing_photo.description = photo_data.description
             existing_photo.tags = tags
-            existing_photo.image_url_transform = photo_data.image_url_transform
+            transformed_url = self.cloudinary_provider.transform(
+                existing_photo.image_url, photo_data.transformation
+            )
+            existing_photo.image_url_transform = transformed_url
             self.db.commit()
         return existing_photo
 
@@ -70,7 +74,7 @@ class PhotoRepository:
         existing_photo = await self.get_photo_by_id(photo_id)
         if not existing_photo:
             return None
-        delete_transformed_image_url(self.db, photo_id)
+        self.cloudinary_provider.delete_transformed_image(existing_photo.image_url_transform)
         self.db.delete(existing_photo)
         self.db.commit()
         return existing_photo

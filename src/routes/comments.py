@@ -9,7 +9,7 @@ from dependencies import get_comments_repository
 router = APIRouter(prefix="/comments", tags=["comments"])
 
 
-@router.post("/comments/", status_code=201)
+@router.post("/", status_code=201)
 async def create_comment(
     photo_id: int,
     user_id: int,
@@ -17,55 +17,53 @@ async def create_comment(
     comments_repo: CommentsRepository = Depends(get_comments_repository),
     current_user: UserOut = Depends(get_current_user),
 ):
-    if current_user.role == RoleEnum.user:
-        raise HTTPException(
-            status_code=403, detail="Only admins and mods can create comments."
-        )
-    return await comments_repo.create_comment(photo_id, user_id, content)
+    return await comments_repo.create_comment(photo_id, current_user.id, content)
 
 
-@router.put("/comments/{comment_id}/", status_code=200)
+@router.put("/{comment_id}", status_code=200)
 async def update_comment(
     comment_id: int,
-    user_id: int,
     new_content: str,
     comments_repo: CommentsRepository = Depends(get_comments_repository),
     current_user: UserOut = Depends(get_current_user),
 ):
-    if current_user.role == RoleEnum.user:
-        raise HTTPException(
-            status_code=403, detail="Only admins and mods can update comments."
-        )
-    updated_comment = await comments_repo.update_comment(
-        comment_id, user_id, new_content
-    )
+    updated_comment = await comments_repo.get_comment(comment_id)
     if not updated_comment:
         raise HTTPException(status_code=404, detail="No comment found.")
-    return updated_comment
+
+    if updated_comment.user_id != current_user.id and current_user.role != RoleEnum.admin:
+        raise HTTPException(
+            status_code=403,
+            detail="You don't have permission to update this comment.",
+        )
+
+    return await comments_repo.update_comment(comment_id, new_content)
 
 
-@router.delete("/comments/{comment_id}/", status_code=204)
+@router.delete("/{comment_id}", status_code=204)
 async def delete_comment(
     comment_id: int,
-    user_role: RoleEnum,
     comments_repo: CommentsRepository = Depends(get_comments_repository),
     current_user: UserOut = Depends(get_current_user),
 ):
-    if current_user.role not in [RoleEnum.admin, RoleEnum.mod]:
-        raise HTTPException(
-            status_code=403, detail="Only admins and mods can delete comments."
-        )
-    if not await comments_repo.delete_comment(comment_id, user_role):
+    comment = await comments_repo.get_comment(comment_id)
+    if not comment:
         raise HTTPException(status_code=404, detail="No comment found.")
 
+    if comment.user_id != current_user.id and current_user.role != RoleEnum.admin:
+        raise HTTPException(
+            status_code=403,
+            detail="You don't have permission to delete this comment.",
+        )
 
-@router.get("/comments/{photo_id}/", response_model=list[CommentOut], status_code=200)
+    await comments_repo.delete_comment(comment_id)
+    return None
+
+
+@router.get("/{photo_id}", response_model=list[CommentOut], status_code=200)
 async def get_comments_for_photo(
     photo_id: int,
     comments_repo: CommentsRepository = Depends(get_comments_repository),
+    current_user: UserOut = Depends(get_current_user),
 ):
-    comments = await comments_repo.get_comments_for_photo(photo_id)
-    if not comments:
-        raise HTTPException(status_code=404, detail="No comments found.")
-    return comments
-    
+    return await comments_repo.get_comments_for_photo(photo_id)
