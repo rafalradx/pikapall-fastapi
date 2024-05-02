@@ -4,7 +4,7 @@ from src.database.models import Photo, Tag
 from src.schemas.photo import PhotoCreate, PhotoUpdateOut, PhotoOut
 from typing import List, Optional
 from src.repository.tags import TagRepository
-from src.services.cloudinary_tr import delete_transformed_image_url
+
 
 class PhotoRepository:
     def __init__(self, db: Session):
@@ -24,8 +24,12 @@ class PhotoRepository:
         :return: The newly created Photo object.
         """
         tags = self.db.query(Tag).filter(Tag.id.in_(photo_data.tags)).all()
-        new_photo = Photo(description=photo_data.description, tags=tags,
-                          image_url=photo_data.image_url, user_id=user_id)
+        new_photo = Photo(
+            description=photo_data.description,
+            tags=tags,
+            image_url=photo_data.image_url,
+            user_id=user_id,
+        )
         self.db.add(new_photo)
         self.db.commit()
         self.db.refresh(new_photo)
@@ -41,7 +45,7 @@ class PhotoRepository:
         return self.db.query(Photo).filter(Photo.id == photo_id).first()
 
     async def update_photo(
-            self, photo_id: int, photo_data: PhotoUpdateOut, user_id: int
+        self, photo_id: int, photo_data: PhotoUpdateOut, user_id: int
     ) -> Optional[PhotoOut]:
         """
         Update a photo.
@@ -78,9 +82,14 @@ class PhotoRepository:
                     return existing_photo
                 except Exception as e:
                     self.db.rollback()
-                    raise HTTPException(status_code=500, detail=f"Could not delete photo: {str(e)}")
+                    raise HTTPException(
+                        status_code=500, detail=f"Could not delete photo: {str(e)}"
+                    )
             else:
-                raise HTTPException(status_code=403, detail="You don't have permission to delete this photo")
+                raise HTTPException(
+                    status_code=403,
+                    detail="You don't have permission to delete this photo",
+                )
         else:
             return None
 

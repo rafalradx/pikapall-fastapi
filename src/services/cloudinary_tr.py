@@ -47,26 +47,27 @@ class CloudinaryImageProvider(AbstractImageProvider):
             "height": transform.height,
             "crop": transform.crop,
             "effect": transform.effect,
-            "angle": transform.angle
+            "angle": transform.angle,
         }
 
         transformed_image = cloudinary.CloudinaryImage(url).build_url(**transformation)
 
         return transformed_image
 
-    def delete_transformed_image_url(db: Session, photo_id: int):
+    def delete_image(image_url: str):
         """
         Usuwa link transformowanego obrazu z pola 'image_url_transform' w modelu Photo.
 
         :param db: Sesja bazy danych.
         :param photo_id: ID zdjęcia, dla którego ma zostać usunięty link transformowanego obrazu.
         """
-        photo = db.query(Photo).filter(Photo.id == photo_id).first()
-        if photo:
-            photo.image_url_transform = None
-            db.commit()
-            return True
-        return False
+        ...
+        # photo = db.query(Photo).filter(Photo.id == photo_id).first()
+        # if photo:
+        #     photo.image_url_transform = None
+        #     db.commit()
+        #     return True
+        # return False
 
     # def apply_transformation(db_session, photo_id, transformation):
     #     photo = db_session.query(Photo).filter(Photo.id == photo_id).first()
