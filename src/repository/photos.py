@@ -4,7 +4,7 @@ from src.database.models import Photo, Tag
 from src.schemas.photo import PhotoCreate, PhotoUpdateOut, PhotoOut
 from typing import List, Optional
 from src.repository.tags import TagRepository
-
+from src.services.cloudinary_tr import delete_transformed_image_url
 
 class PhotoRepository:
     def __init__(self, db: Session):
