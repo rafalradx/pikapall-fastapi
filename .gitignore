@@ -7,3 +7,4 @@ postgres-data/
 postgres-data
 test.db
 .coverage
+.idea
