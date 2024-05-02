@@ -2,7 +2,6 @@ import unittest
 from unittest.mock import MagicMock
 from src.database.models import Rating
 from src.repository.ratings import RatingRepository
-from datetime import datetime
 
 
 class TestRatings(unittest.IsolatedAsyncioTestCase):
@@ -45,6 +44,41 @@ class TestRatings(unittest.IsolatedAsyncioTestCase):
         test_rating_id = 999
         self.db_session.query.return_value.filter.return_value.first.return_value = None
         result = await self.rating_repository.get_rating_by_id(rating_id=test_rating_id)
+        self.assertIsNone(result)
+
+    async def test_get_ratings_for_photo(self):
+        mock_ratings = [Rating(id=1, photo_id=1, user_id=1, rating=4), Rating(
+            id=2, photo_id=1, user_id=2, rating=3)]
+        self.db_session.query.return_value.filter.return_value.all.return_value = mock_ratings
+        result = await self.rating_repository.get_ratings_for_photo(photo_id=1)
+        self.assertEqual(result, mock_ratings)
+
+    async def test_get_ratings_for_photo_not_found(self):
+        self.db_session.query.return_value.filter.return_value.all.return_value = []
+        result = await self.rating_repository.get_ratings_for_photo(photo_id=999)
+        self.assertEqual(result, [])
+
+    async def test_get_user_ratings(self):
+        mock_ratings = [Rating(id=1, photo_id=1, user_id=1, rating=4), Rating(
+            id=2, photo_id=2, user_id=1, rating=3)]
+        self.db_session.query.return_value.filter.return_value.all.return_value = mock_ratings
+        result = await self.rating_repository.get_user_ratings(user_id=1)
+        self.assertEqual(result, mock_ratings)
+
+    async def test_get_user_ratings_not_found(self):
+        self.db_session.query.return_value.filter.return_value.all.return_value = []
+        result = await self.rating_repository.get_user_ratings(user_id=999)
+        self.assertEqual(result, [])
+
+    async def test_get_user_rating_for_photo(self):
+        mock_rating = Rating(id=1, photo_id=1, user_id=1, rating=4)
+        self.db_session.query.return_value.filter.return_value.first.return_value = mock_rating
+        result = await self.rating_repository.get_user_rating_for_photo(photo_id=1, user_id=1)
+        self.assertEqual(result, mock_rating)
+
+    async def test_get_user_rating_for_photo_not_found(self):
+        self.db_session.query.return_value.filter.return_value.first.return_value = None
+        result = await self.rating_repository.get_user_rating_for_photo(photo_id=999, user_id=1)
         self.assertIsNone(result)
 
 
