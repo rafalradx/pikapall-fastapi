@@ -28,6 +28,7 @@ class PhotoRepository:
             description=photo_data.description,
             tags=tags,
             image_url=photo_data.image_url,
+            cloudinary_public_id=photo_data.cloudinary_public_id,
             user_id=user_id,
         )
         self.db.add(new_photo)
@@ -60,13 +61,17 @@ class PhotoRepository:
             tags = self.db.query(Tag).filter(Tag.id.in_(photo_data.tags)).all()
             existing_photo.description = photo_data.description
             existing_photo.tags = tags
-            transformed_url = self.cloudinary_provider.transform(
-                existing_photo.image_url, photo_data.transformation
-            )
-            existing_photo.image_url_transform = transformed_url
             self.db.commit()
             return existing_photo
         return None
+
+    async def update_photo_trans_url(self, photo_id: int, url: str) -> PhotoOut:
+        existing_photo = await self.get_photo_by_id(photo_id)
+        if not existing_photo:
+            return None
+        existing_photo.image_url_transform = url
+        self.db.commit()
+        return existing_photo
 
     async def delete_photo(self, photo_id: int, user_id: int) -> Optional[PhotoOut]:
         """

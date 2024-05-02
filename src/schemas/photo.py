@@ -77,6 +77,7 @@ class PhotoCreate(BaseModel):
     description: str = Field(max_length=500)
     tags: Optional[List[int]] | None = None
     image_url: str = Field(max_length=255, default=None)
+    cloudinary_public_id: str = Field(max_length=255, default=None)
 
 
 class PhotoOut(BaseModel):
@@ -89,6 +90,7 @@ class PhotoOut(BaseModel):
     description: str = Field(max_length=500)
     tags: Optional[List[TagOut]] | None = None
     image_url: str = Field(max_length=255, default=None)
+    cloudinary_public_id: str = Field(max_length=255, default=None)
     image_url_transform: Optional[str] = Field(max_length=255)
     user_id: int
     created_at: datetime
@@ -102,7 +104,7 @@ class PhotoOut(BaseModel):
 class PhotoUpdateIn(BaseModel):
     description: str = Field(max_length=500)
     tags: Optional[List[str]] | None = None
-    image_url_transform: Optional[str] = Field(max_length=255, default=None)
+    # image_url_transform: Optional[str] = Field(max_length=255, default=None)
 
     @model_validator(mode="before")
     @classmethod
@@ -121,7 +123,7 @@ class PhotoUpdateIn(BaseModel):
 class PhotoUpdateOut(BaseModel):
     description: str = Field(max_length=500)
     tags: Optional[List[int]] | None = None
-    image_url_transform: Optional[str] = Field(max_length=255, default=None)
+    # image_url_transform: Optional[str] = Field(max_length=255, default=None)
 
     @validator("tags")
     def validate_tags(cls, tags):
@@ -131,19 +133,20 @@ class PhotoUpdateOut(BaseModel):
 
 
 class TransformationInput(BaseModel):
-    width: int
-    height: int
-    crop: str
-    effect: str
-    angle: int
+    width: int | None = None
+    height: int | None = None
+    crop: str | None = None
+    effect: str | None = None
+    angle: int | None = None
 
-    class Config:
-        schema_extra = {
+    model_config = {
+        "json_schema_extra": {
             "example": {
-                "width": 100,
-                "height": 150,
+                "width": 250,
+                "height": 250,
                 "crop": "fill",
                 "effect": "sepia",
                 "angle": 45,
             }
         }
+    }
