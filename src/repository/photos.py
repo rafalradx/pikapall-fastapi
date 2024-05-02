@@ -60,7 +60,10 @@ class PhotoRepository:
             tags = self.db.query(Tag).filter(Tag.id.in_(photo_data.tags)).all()
             existing_photo.description = photo_data.description
             existing_photo.tags = tags
-            existing_photo.image_url_transform = photo_data.image_url_transform
+            transformed_url = self.cloudinary_provider.transform(
+                existing_photo.image_url, photo_data.transformation
+            )
+            existing_photo.image_url_transform = transformed_url
             self.db.commit()
             return existing_photo
         return None

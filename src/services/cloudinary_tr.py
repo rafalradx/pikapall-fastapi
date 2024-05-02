@@ -1,11 +1,10 @@
 import cloudinary
 import cloudinary.uploader
+import cloudinary.api
 from fastapi import UploadFile
 from src.services.abstract import AbstractImageProvider
 from src.schemas.users import UserOut
-from src.database.models import Photo
 from src.schemas.photo import TransformationInput
-from sqlalchemy.orm import Session
 
 
 class CloudinaryImageProvider(AbstractImageProvider):
@@ -15,23 +14,6 @@ class CloudinaryImageProvider(AbstractImageProvider):
             api_key=settings["api_key"],
             api_secret=settings["api_secret"],
         )
-
-    def upload(self, file: UploadFile, current_user: UserOut):
-        """
-        Uploads the file to Cloudinary and saves the transformed image URL.
-
-        :param file: The file to upload.
-        :param current_user: The current user.
-        :return: Transformed image URL.
-        """
-        client = cloudinary.uploader.upload(
-            file.file, public_id=f"PikaPall/{current_user.username}", overwrite=True
-        )
-        src_url = cloudinary.CloudinaryImage(
-            f"PikaPall/{current_user.username}"
-        ).build_url(width=250, height=250, crop="fill", version=client.get("version"))
-
-        return src_url
 
     def transform(self, url, transform: TransformationInput):
         """
@@ -54,20 +36,33 @@ class CloudinaryImageProvider(AbstractImageProvider):
 
         return transformed_image
 
-    def delete_image(image_url: str):
+    def upload(self, file: UploadFile, current_user: UserOut):
         """
-        Usuwa link transformowanego obrazu z pola 'image_url_transform' w modelu Photo.
+        Uploads the file to Cloudinary and saves the transformed image URL.
 
-        :param db: Sesja bazy danych.
-        :param photo_id: ID zdjęcia, dla którego ma zostać usunięty link transformowanego obrazu.
+        :param file: The file to upload.
+        :param current_user: The current user.
+        :return: Transformed image URL.
         """
-        ...
-        # photo = db.query(Photo).filter(Photo.id == photo_id).first()
-        # if photo:
-        #     photo.image_url_transform = None
-        #     db.commit()
-        #     return True
-        # return False
+        client = cloudinary.uploader.upload(
+            file.file, public_id=f"PikaPall/{current_user.username}", overwrite=True
+        )
+        src_url = cloudinary.CloudinaryImage(
+            f"PikaPall/{current_user.username}"
+        ).build_url(width=250, height=250, crop="fill", version=client.get("version"))
+
+        return src_url
+
+
+
+    def delete_transformed_image(self, public_id):
+        """
+        Deletes a transformed image from Cloudinary.
+
+        :param public_id: Public ID of the image.
+        """
+        cloudinary.uploader.destroy(public_id, invalidate=True)
+
 
     # def apply_transformation(db_session, photo_id, transformation):
     #     photo = db_session.query(Photo).filter(Photo.id == photo_id).first()
