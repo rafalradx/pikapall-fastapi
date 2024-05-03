@@ -2,7 +2,7 @@ from datetime import datetime
 from pydantic import BaseModel, Field, validator, model_validator
 from typing import List, Optional
 import json
-from src.schemas.comments import CommentDisplay
+from src.schemas.comments import CommentOut
 from src.schemas.tags import TagOut
 
 
@@ -46,7 +46,7 @@ class PhotoOut(BaseModel):
     user_id: int
     created_at: datetime
     average_rating: Optional[float]
-    comments: Optional[List[CommentDisplay]] | None = None
+    comments: Optional[List[CommentOut]] | None = None
 
     class Config:
         from_attributes = True

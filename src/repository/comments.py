@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from src.database.models import Comment
 from datetime import datetime
 from src.schemas.users import RoleEnum
-from src.schemas.comments import CommentOut, CommentDisplay
+from src.schemas.comments import CommentIn, CommentOut, CommentUpdate
 from typing import Optional
 
 
@@ -10,9 +10,7 @@ class CommentsRepository:
     def __init__(self, db_session: Session) -> None:
         self._db = db_session
 
-    async def create_comment(
-        self, photo_id: int, user_id: int, content: str
-    ) -> Optional[CommentOut]:
+    async def create_comment(self, new_comment: CommentIn, user_id: int) -> CommentOut:
         """
         Function that creates a new comment for a photo.
 
@@ -23,11 +21,11 @@ class CommentsRepository:
         :return: A newly created comment object.
         """
         new_comment = Comment(
-            photo_id=photo_id,
+            photo_id=new_comment.photo_id,
             user_id=user_id,
-            content=content,
+            content=new_comment.content,
             created_at=datetime.now(),
-            updated_at=datetime.now(),
+            updated_at=None,
         )
         self._db.add(new_comment)
         self._db.commit()
@@ -35,8 +33,8 @@ class CommentsRepository:
         return new_comment
 
     async def update_comment(
-        self, comment_id: int, user_id: int, new_content: str
-    ) -> Optional[CommentOut]:
+        self, comment_id: int, new_content: CommentUpdate
+    ) -> CommentOut:
         """
         Function that updates the comment content.
 
@@ -47,17 +45,16 @@ class CommentsRepository:
         :return: The updated comment object, or None if the user is not the author of the comment.
         """
         comment = self._db.query(Comment).filter(Comment.id == comment_id).first()
-        if comment and comment.user_id == user_id:
-            comment.content = new_content
-            comment.updated_at = datetime.now()
-            self._db.commit()
-            self._db.refresh(comment)
-            return comment
-        return None
+        comment.content = new_content.content
+        comment.updated_at = datetime.now()
+        self._db.commit()
+        self._db.refresh(comment)
+        return comment
 
     async def delete_comment(
-        self, comment_id: int, user_role: RoleEnum
-    ) -> Optional[CommentOut]:
+        self,
+        comment_id: int,
+    ) -> CommentOut:
         """
         Function to remove a comment.
 
@@ -68,22 +65,11 @@ class CommentsRepository:
         :return: The deleted comment object if found, otherwise False.
         """
         comment = self._db.query(Comment).filter(Comment.id == comment_id).first()
-        if not comment:
-            return None
-
-        if comment.user_id != user_id and user_role not in [
-            RoleEnum.admin,
-            RoleEnum.mod,
-        ]:
-            return None
-
         self._db.delete(comment)
         self._db.commit()
         return comment
 
-    async def get_comments_for_photo(
-        self, photo_id: int
-    ) -> Optional[list[CommentDisplay]]:
+    async def get_comments_for_photo(self, photo_id: int) -> Optional[list[CommentOut]]:
         """
         A function that returns all comments for a given photo.
 
