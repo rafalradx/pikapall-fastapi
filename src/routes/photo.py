@@ -142,7 +142,6 @@ async def update_photo(
     data = PhotoUpdateOut(
         description=photo_data.description,
         tags=photo_tags,
-        image_url_transform=photo_data.image_url_transform,
     )
     updated_photo = await photos_repository.update_photo(
         photo_id, data, current_user.id
