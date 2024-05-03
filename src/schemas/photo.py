@@ -2,49 +2,8 @@ from datetime import datetime
 from pydantic import BaseModel, Field, validator, model_validator
 from typing import List, Optional
 import json
-
-
-class TagIn(BaseModel):
-    name: str = Field(max_length=25)
-
-
-class TagOut(TagIn):
-    id: int
-
-    class Config:
-        from_attributes = True
-
-
-class CommentOut(BaseModel):
-    id: int
-    content: str = Field(max_length=255)
-    photo_id: int
-    user_id: int
-    created_at: datetime
-    updated_at: datetime
-
-    class Config:
-        from_attributes = True
-
-
-class CommentDisplay(BaseModel):
-    user_id: int
-    content: str
-    created_at: datetime
-    updated_at: datetime
-
-
-class RatingIn(BaseModel):
-    photo_id: int
-    user_id: int
-    rating: int
-
-
-class RatingOut(RatingIn):
-    id: int
-
-    class Config:
-        from_attributes = True
+from src.schemas.comments import CommentDisplay
+from src.schemas.tags import TagOut
 
 
 class PhotoIn(BaseModel):
