@@ -45,8 +45,8 @@ class Photo(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     user = relationship("User", backref="photos")
     tags = relationship("Tag", secondary="photo_m2m_tags", backref="photos")
-    comments = relationship("Comment", backref="photo")
-    ratings = relationship("Rating", backref="photo")
+    comments = relationship("Comment", backref="photo", cascade="all, delete-orphan")
+    ratings = relationship("Rating", backref="photo", cascade="all, delete-orphan")
 
     @hybrid_property
     def average_rating(self):
@@ -71,8 +71,8 @@ class User(Base):
     )
     registration_date = Column(DateTime(timezone=True), server_default=func.now())
     refresh_token = Column(String(255), nullable=True)
-    comments = relationship("Comment", backref="user")
-    ratings = relationship("Rating", backref="user")
+    comments = relationship("Comment", backref="user", cascade="all, delete-orphan")
+    ratings = relationship("Rating", backref="user", cascade="all, delete-orphan")
 
 
 class Tag(Base):
