@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock
 from sqlalchemy.orm import Session
 from src.repository.photos import PhotoRepository
 from src.schemas.photo import PhotoCreate, PhotoUpdateOut
@@ -15,17 +15,24 @@ class TestPhotoRepository(unittest.IsolatedAsyncioTestCase):
         return await func(*args, **kwargs)
 
     async def test_create_photo(self):
-        photo_data = PhotoCreate(description="Test Description", tags=[1, 2], image_url="test.jpg")
+        photo_data = PhotoCreate(
+            description="Test Description", tags=[1, 2], image_url="test.jpg"
+        )
         user_id = 1
         tags = [Tag(id=1), Tag(id=2)]
         self.db.query.return_value.filter.return_value.all.return_value = tags
-        new_photo = Photo(description=photo_data.description, tags=tags, image_url=photo_data.image_url,
-                          user_id=user_id)  # usuwamy ustawienie id
+        new_photo = Photo(
+            description=photo_data.description,
+            tags=tags,
+            image_url=photo_data.image_url,
+            user_id=user_id,
+        )  # usuwamy ustawienie id
         self.db.add.return_value = new_photo
 
         result = await self.repository.create_photo(photo_data, user_id)
 
         self.assertIsNone(result.id)
+
     async def test_get_photo_by_id(self):
         photo_id = 1
         photo = Photo(id=photo_id)
@@ -37,9 +44,13 @@ class TestPhotoRepository(unittest.IsolatedAsyncioTestCase):
 
     async def test_update_photo(self):
         photo_id = 1
-        photo_data = PhotoUpdateOut(description="Updated Description", tags=[1, 2], image_url_transform="test_transform.jpg")
+        photo_data = PhotoUpdateOut(
+            description="Updated Description",
+            tags=[1, 2],
+            image_url_transform="test_transform.jpg",
+        )
         existing_photo = Photo(id=photo_id)
-        self.repository.get_photo_by_id = MagicMock(return_value=existing_photo)
+        self.repository.get_photo_by_id = AsyncMock(return_value=existing_photo)
         tags = [Tag(id=1), Tag(id=2)]
         self.db.query.return_value.filter.return_value.all.return_value = tags
 
@@ -51,7 +62,7 @@ class TestPhotoRepository(unittest.IsolatedAsyncioTestCase):
     async def test_delete_photo(self):
         photo_id = 1
         existing_photo = Photo(id=photo_id)
-        self.repository.get_photo_by_id = MagicMock(return_value=existing_photo)
+        self.repository.get_photo_by_id = AsyncMock(return_value=existing_photo)
 
         result = await self.repository.delete_photo(photo_id, 1)
 
@@ -78,10 +89,12 @@ class TestPhotoRepository(unittest.IsolatedAsyncioTestCase):
         photos = [Photo(id=1), Photo(id=2)]
         self.db.query.return_value.all.return_value = photos
 
-        result = await self.repository.filter_photos(tag="test_tag", start_date="2024-01-01", end_date="2024-05-01")
+        result = await self.repository.filter_photos(
+            tag="test_tag", start_date="2024-01-01", end_date="2024-05-01"
+        )
 
         self.assertEqual(result, photos)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
