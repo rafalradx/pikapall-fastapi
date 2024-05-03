@@ -15,10 +15,10 @@ from dependencies import (
 )
 from src.schemas.users import UserOut
 from src.services.auth_user import get_current_user
-from src.services.cloudinary_tr import (
+from src.services.image_provider import (
+    AbstractImageProvider,
     CloudinaryImageProvider,
 )
-from src.services.abstract import AbstractImageProvider
 from src.repository.tags import TagRepository
 import io
 import qrcode
