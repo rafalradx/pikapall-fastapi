@@ -173,9 +173,7 @@ async def delete_photo(
 
     if not deleted_photo:
         raise HTTPException(status_code=404, detail="Photo not found.")
-    image_provider.delete(deleted_photo.image_url)
-    if deleted_photo.image_url_transform:
-        image_provider.delete(deleted_photo.image_url_transform)
+    image_provider.delete(deleted_photo.cloudinary_public_id)
     return deleted_photo
 
 

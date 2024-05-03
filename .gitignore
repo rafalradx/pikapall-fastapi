@@ -8,3 +8,5 @@ postgres-data
 test.db
 .coverage
 .idea
+.docs
+.htmlcov
