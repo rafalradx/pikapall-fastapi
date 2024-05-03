@@ -102,16 +102,8 @@ class PhotoRepository:
         else:
             return None
 
-    async def get_all_photos(self) -> List[PhotoOut]:
-        """
-        Retrieve all photos.
 
-        :return: A list of all Photo objects.
-        """
-        return self.db.query(Photo).all()
-
-
-    async def filter_photos(
+    async def get_photos(
         self,
         keyword: str = None,
         created_after: str = None,

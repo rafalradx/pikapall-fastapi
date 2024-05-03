@@ -66,22 +66,6 @@ async def create_photo(
     return new_photo
 
 
-@router.get("/", response_model=list[PhotoOut], summary="Get all photos")
-async def get_all_photos(
-    photos_repository: PhotoRepository = Depends(get_photos_repository),
-    current_user: UserOut = Depends(get_current_user),
-):
-    """
-    Get all photos.
-
-    :return: List of all photos.
-    """
-    photos = await photos_repository.get_all_photos()
-    if not photos:
-        raise HTTPException(status_code=404, detail="No photos found.")
-    return photos
-
-
 @router.get("/{photo_id}", response_model=PhotoOut, summary="Get a photo by ID")
 async def get_photo_by_id(
     photo_id: int,
@@ -185,9 +169,9 @@ async def delete_photo(
 
 
 @router.get(
-    "/filter/", response_model=list[PhotoOut], summary="Search and filter photos by criteria"
+    "/", response_model=list[PhotoOut], summary="Display and/or search and/or filter photos by criteria."
 )
-async def filter_photos(
+async def get_photos(
     keyword: str = None,
     created_after: str = None,
     created_before: str = None,
@@ -198,7 +182,7 @@ async def filter_photos(
     photos_repository: PhotoRepository = Depends(get_photos_repository),
 ):
     """
-    Search and filter photos by specified criteria.
+    Display and/or search and/or filter photos by criteria.
 
     :param keyword: The parameter allows you to search for photos by keyword in fields such as Tag and Description.
 
@@ -219,7 +203,7 @@ async def filter_photos(
     if current_user.role not in [RoleEnum.admin, RoleEnum.mod] and user_id != None:
         raise HTTPException(status_code=403, detail="Only administrators and moderators can search for photos by user_id.")
 
-    photos = await photos_repository.filter_photos(
+    photos = await photos_repository.get_photos(
         keyword, created_after, created_before, avg_rating_above, avg_rating_below, user_id
     )
 
