@@ -235,12 +235,19 @@ async def transform_photo(
 ) -> PhotoOut:
     """
     Apply transformation to a photo by ID.
+
     angle: rotate image clockwise by angle in degrees
+
     effect: "sepia", "cartoonify",
+
     crop: "crop", "fill", "thumb"
+
     height: pixel or fraction
+
     width: pixel or fraction
+
     gravity: "face"; automatic face detection
+
     radius: pixel or max; radius for corner rounding
 
     """
