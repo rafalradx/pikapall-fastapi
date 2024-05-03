@@ -87,15 +87,19 @@ class TransformationInput(BaseModel):
     crop: str | None = None
     effect: str | None = None
     angle: int | None = None
+    gravity: str | None = None
+    radius: str | None = None
 
     model_config = {
         "json_schema_extra": {
             "example": {
                 "width": 250,
                 "height": 250,
-                "crop": "fill",
+                "crop": "thumb",
                 "effect": "sepia",
                 "angle": 45,
+                "gravity": "face",
+                "radius": "max",
             }
         }
     }
