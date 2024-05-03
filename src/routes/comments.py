@@ -11,7 +11,7 @@ router = APIRouter(prefix="/comments", tags=["comments"])
 
 @router.get("", status_code=200)
 async def get_comments_for_photo(
-    photo_id: int,
+    photo_id: int = None,
     comments_repo: CommentsRepository = Depends(get_comments_repository),
     current_user: UserOut = Depends(get_current_user),
 ) -> list[CommentOut]:

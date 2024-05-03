@@ -77,6 +77,8 @@ class CommentsRepository:
         :param photo_id: Photo ID.
         :return: List of comments for a given photo.
         """
+        if not photo_id:
+            return self._db.query(Comment).all()
 
         return self._db.query(Comment).filter(Comment.photo_id == photo_id).all()
 
