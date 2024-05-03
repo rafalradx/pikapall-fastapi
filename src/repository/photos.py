@@ -1,10 +1,11 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from fastapi import HTTPException
-from src.database.models import Photo, Tag
+from src.database.models import Photo, Tag, Rating
 from src.schemas.photo import PhotoCreate, PhotoUpdateOut, PhotoOut
 from typing import List, Optional
 from src.repository.tags import TagRepository
-
+from sqlalchemy import or_
 
 class PhotoRepository:
     def __init__(self, db: Session):
@@ -109,21 +110,15 @@ class PhotoRepository:
         """
         return self.db.query(Photo).all()
 
-    async def search_photos_by_tag(self, tag: str) -> List[PhotoOut]:
-        """
-        Search photos by tag.
-
-        :param tag: The tag to search for.
-        :return: A list of Photo objects containing the specified tag.
-        """
-        return self.db.query(Photo).filter(Photo.tags.any(Tag.name == tag)).all()
 
     async def filter_photos(
         self,
-        tag: str = None,
-        min_rating: int = None,
-        start_date: str = None,
-        end_date: str = None,
+        keyword: str = None,
+        created_after: str = None,
+        created_before: str = None,
+        avg_rating_above: str = None,
+        avg_rating_below: str = None,
+        user_id: int = None,
     ) -> List[PhotoOut]:
         """
         Filter photos by various criteria.
@@ -134,11 +129,19 @@ class PhotoRepository:
         :param end_date: The end date to filter by.
         :return: A list of Photo objects matching the filter criteria.
         """
+        word = f"%{keyword}%"
+
         query = self.db.query(Photo)
-        if tag:
-            query = query.filter(Photo.tags.any(Tag.name == tag))
-        if start_date:
-            query = query.filter(Photo.created_at >= start_date)
-        if end_date:
-            query = query.filter(Photo.created_at <= end_date)
+        if keyword:
+            query = query.filter(or_(Photo.tags.any(Tag.name.ilike(word)), Photo.description.ilike(word)))
+        if created_after:
+            query = query.filter(Photo.created_at > created_after)
+        if created_before:
+            query = query.filter(Photo.created_at < created_before)
+        if avg_rating_above:
+            query = query.outerjoin(Rating).group_by(Photo.id).having(func.avg(Rating.rating) > avg_rating_above)
+        if avg_rating_below:
+            query = query.outerjoin(Rating).group_by(Photo.id).having(func.avg(Rating.rating) < avg_rating_below)
+        if user_id:
+            query = query.filter(Photo.user_id == user_id)
         return query.all()

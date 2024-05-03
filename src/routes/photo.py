@@ -13,7 +13,7 @@ from dependencies import (
     get_photos_repository,
     PhotoRepository,
 )
-from src.schemas.users import UserOut
+from src.schemas.users import UserOut, RoleEnum
 from src.services.auth_user import get_current_user
 from src.services.image_provider import (
     AbstractImageProvider,
@@ -42,8 +42,9 @@ async def create_photo(
     Create a new photo.
 
     :param photo_data: Data of the photo to create.
+
     :param current_user: The current authenticated user.
-    :param db: Database session.
+
     :return: Created photo.
     """
     if not current_user:
@@ -73,7 +74,6 @@ async def get_all_photos(
     """
     Get all photos.
 
-    :param db: Database session.
     :return: List of all photos.
     """
     photos = await photos_repository.get_all_photos()
@@ -93,7 +93,7 @@ async def get_photo_by_id(
     Get a photo by ID.
 
     :param photo_id: ID of the photo to retrieve.
-    :param db: Database session.
+
     :return: Retrieved photo.
     """
 
@@ -126,9 +126,11 @@ async def update_photo(
     Update a photo by ID.
 
     :param photo_id: ID of the photo to update.
+
     :param photo_data: Updated data for the photo.
+
     :param current_user: The current authenticated user.
-    :param db: Database session.
+
     :return: Updated photo.
     """
     if not current_user:
@@ -162,12 +164,17 @@ async def delete_photo(
     Delete a photo by ID.
 
     :param photo_id: ID of the photo to delete.
+
     :param current_user: The current authenticated user.
-    :param db: Database session.
+
     :return: Deleted photo.
     """
     if not current_user:
         raise HTTPException(status_code=401, detail="Unauthorized")
+
+    photo = await photos_repository.get_photo_by_id(photo_id)
+    if photo.user_id != current_user.id and current_user.role != RoleEnum.admin:
+        raise HTTPException(status_code=403, detail="You can't delete another user's photo if you're not an administrator.")
 
     deleted_photo = await photos_repository.delete_photo(photo_id, current_user.id)
 
@@ -177,45 +184,48 @@ async def delete_photo(
     return deleted_photo
 
 
-@router.get("/search/", response_model=list[PhotoOut], summary="Search photos by tag")
-async def search_photos_by_tag(
-    tag: str = Query(..., description="Tag to search for"),
-    photos_repository: PhotoRepository = Depends(get_photos_repository),
-):
-    """
-    Search photos by tag.
-
-    :param tag: The tag to search for.
-    :param db: Database session.
-    :return: List of photos matching the tag.
-    """
-    photos = await photos_repository.search_photos_by_tag(tag)
-    return photos
-
-
 @router.get(
-    "/filter/", response_model=list[PhotoOut], summary="Filter photos by criteria"
+    "/filter/", response_model=list[PhotoOut], summary="Search and filter photos by criteria"
 )
 async def filter_photos(
-    tag: str = None,
-    start_date: str = None,
-    end_date: str = None,
-    min_rating: str = None,
+    keyword: str = None,
+    created_after: str = None,
+    created_before: str = None,
+    avg_rating_above: str = None,
+    avg_rating_below: str = None,
+    user_id: int = None,
+    current_user: UserOut = Depends(get_current_user),
     photos_repository: PhotoRepository = Depends(get_photos_repository),
 ):
     """
-    Filter photos by specified criteria.
+    Search and filter photos by specified criteria.
 
-    :param tag: Tag to filter by.
-    :param min_rating: Minimum rating to filter by.
-    :param start_date: Start date to filter by.
-    :param end_date: End date to filter by.
-    :param db: Database session.
+    :param keyword: The parameter allows you to search for photos by keyword in fields such as Tag and Description.
+
+    :param created_after: The parameter allows you to search for photos created after the specified date.
+
+    :param created_before: The parameter allows you to search for photos created before the specified date.
+
+    :param avg_rating_above: The parameter allows you to search for photos above the indicated average rating.
+
+    :param avg_rating_below: The parameter allows you to search for photos below the indicated average rating.
+
+    :param user_id: The parameter allows you to search for photos of a specific user.
+
+    :param current_user: The current authenticated user.
+
     :return: List of filtered photos.
     """
+    if current_user.role not in [RoleEnum.admin, RoleEnum.mod] and user_id != None:
+        raise HTTPException(status_code=403, detail="Only administrators and moderators can search for photos by user_id.")
+
     photos = await photos_repository.filter_photos(
-        tag, min_rating, start_date, end_date
+        keyword, created_after, created_before, avg_rating_above, avg_rating_below, user_id
     )
+
+    if not photos:
+        raise HTTPException(status_code=404, detail="No photos found.")
+    
     return photos
 
 
@@ -247,7 +257,6 @@ async def transform_photo(
     gravity: "face"; automatic face detection
 
     radius: pixel or max; radius for corner rounding
-
     """
     photo = await photos_repository.get_photo_by_id(photo_id=photo_id)
     if not photo:
