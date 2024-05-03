@@ -2,22 +2,17 @@ from sqlalchemy import (
     Column,
     Integer,
     String,
-    JSON,
-    Date,
-    Boolean,
     Table,
     func,
     Enum,
     Text,
     UniqueConstraint,
     DateTime,
-    Float,
-    select
 )
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.schema import ForeignKey
 from sqlalchemy.sql.sqltypes import DateTime
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
 from sqlalchemy.ext.hybrid import hybrid_property
 
 Base = declarative_base()
@@ -61,7 +56,8 @@ class Photo(Base):
             return total_ratings / num_ratings
         else:
             return None
-        
+
+
 class User(Base):
     __tablename__ = "users"
 

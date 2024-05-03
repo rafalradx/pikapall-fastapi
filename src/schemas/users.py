@@ -33,8 +33,7 @@ class UserOut(BaseModel):
     role: RoleEnum
     registration_date: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = {"from_attributes": True}
 
 
 class UserChangeRole(BaseModel):

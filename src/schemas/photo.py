@@ -1,5 +1,5 @@
 from datetime import datetime
-from pydantic import BaseModel, Field, validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from typing import List, Optional
 import json
 from src.schemas.comments import CommentOut
@@ -17,7 +17,7 @@ class PhotoIn(BaseModel):
             return cls(**json.loads(value))
         return value
 
-    @validator("tags")
+    @field_validator("tags")
     def validate_tags(cls, tags):
         if tags is not None and len(tags) > 5:
             raise ValueError("Number of tags cannot exceed 5.")
@@ -48,8 +48,7 @@ class PhotoOut(BaseModel):
     average_rating: Optional[float]
     comments: Optional[List[CommentOut]] | None = None
 
-    class Config:
-        from_attributes = True
+    model_config = {"from_attributes": True}
 
 
 class PhotoUpdateIn(BaseModel):
@@ -63,7 +62,7 @@ class PhotoUpdateIn(BaseModel):
             return cls(**json.loads(value))
         return value
 
-    @validator("tags")
+    @field_validator("tags")
     def validate_tags(cls, tags):
         if tags is not None and len(tags) > 5:
             raise ValueError("Number of tags cannot exceed 5.")
@@ -74,7 +73,7 @@ class PhotoUpdateOut(BaseModel):
     description: str = Field(max_length=500)
     tags: Optional[List[int]] | None = None
 
-    @validator("tags")
+    @field_validator("tags")
     def validate_tags(cls, tags):
         if tags is not None and len(tags) > 5:
             raise ValueError("Number of tags cannot exceed 5.")
