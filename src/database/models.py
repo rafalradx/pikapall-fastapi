@@ -12,6 +12,7 @@ from sqlalchemy import (
     UniqueConstraint,
     DateTime,
     Float,
+    select
 )
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.schema import ForeignKey
@@ -60,8 +61,7 @@ class Photo(Base):
             return total_ratings / num_ratings
         else:
             return None
-
-
+        
 class User(Base):
     __tablename__ = "users"
 
