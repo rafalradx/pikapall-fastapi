@@ -1,5 +1,6 @@
 import unittest
 from unittest.mock import AsyncMock, MagicMock
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from src.repository.photos import PhotoRepository
 from src.schemas.photo import PhotoCreate, PhotoUpdateOut
@@ -59,14 +60,25 @@ class TestPhotoRepository(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result, existing_photo)
         self.db.commit.assert_called_once()
 
-    async def test_delete_photo(self):
+    async def test_delete_photo_by_owner(self):
         photo_id = 1
-        existing_photo = Photo(id=photo_id)
+        owner_id = 1
+        existing_photo = Photo(id=photo_id, user_id=owner_id)
         self.repository.get_photo_by_id = AsyncMock(return_value=existing_photo)
-
-        result = await self.repository.delete_photo(photo_id, 1)
-
+        result = await self.repository.delete_photo(photo_id=photo_id, user_id=owner_id)
         self.assertEqual(result, existing_photo)
+
+    async def test_delete_photo_not_owner(self):
+        photo_id = 1
+        owner_id = 5
+        not_owner_id = 6
+        existing_photo = Photo(id=photo_id, user_id=owner_id)
+        self.repository.get_photo_by_id = AsyncMock(return_value=existing_photo)
+        with self.assertRaises(HTTPException) as context:
+            await self.repository.delete_photo(photo_id=photo_id, user_id=not_owner_id)
+        self.assertTrue(
+            "You don't have permission to delete this photo" in str(context.exception)
+        )
 
     async def test_get_all_photos(self):
         photos = [Photo(id=1), Photo(id=2)]
