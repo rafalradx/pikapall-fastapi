@@ -1,6 +1,5 @@
 from src.repository.abstract import AbstractUserRepository
-from src.services.abstract import AbstractImageProvider
-from src.services.cloudinary_tr import CloudinaryImageProvider
+from src.services.image_provider import AbstractImageProvider, CloudinaryImageProvider
 from src.services.pwd_handler import AbstractPasswordHashHandler, BcryptPasswordHandler
 from src.database.db import SessionLocal
 from src.repository.users import UserRepository
