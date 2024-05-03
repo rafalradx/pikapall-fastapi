@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends, status
 from src.schemas.users import UserOut
-from src.schemas.photo import TagOut, TagIn
+from src.schemas.tags import TagOut, TagIn
 from src.services.auth_user import get_current_user
 from src.repository.tags import TagRepository
 from dependencies import get_tags_repository

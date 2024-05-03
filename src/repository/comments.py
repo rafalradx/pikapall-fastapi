@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from src.database.models import Comment
 from datetime import datetime
 from src.schemas.users import RoleEnum
-from src.schemas.photo import CommentOut, CommentDisplay
+from src.schemas.comments import CommentOut, CommentDisplay
 from typing import Optional
 
 
@@ -10,7 +10,9 @@ class CommentsRepository:
     def __init__(self, db_session: Session) -> None:
         self._db = db_session
 
-    async def create_comment(self, photo_id: int, user_id: int, content: str) -> Optional[CommentOut]:
+    async def create_comment(
+        self, photo_id: int, user_id: int, content: str
+    ) -> Optional[CommentOut]:
         """
         Function that creates a new comment for a photo.
 
@@ -32,7 +34,9 @@ class CommentsRepository:
         self._db.refresh(new_comment)
         return new_comment
 
-    async def update_comment(self, comment_id: int, user_id: int, new_content: str) -> Optional[CommentOut]:
+    async def update_comment(
+        self, comment_id: int, user_id: int, new_content: str
+    ) -> Optional[CommentOut]:
         """
         Function that updates the comment content.
 
@@ -51,9 +55,9 @@ class CommentsRepository:
             return comment
         return None
 
-
-    async def delete_comment(self, comment_id: int, user_role: RoleEnum) -> Optional[CommentOut]:
-
+    async def delete_comment(
+        self, comment_id: int, user_role: RoleEnum
+    ) -> Optional[CommentOut]:
         """
         Function to remove a comment.
 
@@ -67,14 +71,19 @@ class CommentsRepository:
         if not comment:
             return None
 
-        if comment.user_id != user_id and user_role not in [RoleEnum.admin, RoleEnum.mod]:
+        if comment.user_id != user_id and user_role not in [
+            RoleEnum.admin,
+            RoleEnum.mod,
+        ]:
             return None
 
         self._db.delete(comment)
         self._db.commit()
         return comment
 
-    async def get_comments_for_photo(self, photo_id: int) -> Optional[list[CommentDisplay]]:
+    async def get_comments_for_photo(
+        self, photo_id: int
+    ) -> Optional[list[CommentDisplay]]:
         """
         A function that returns all comments for a given photo.
 
@@ -84,7 +93,7 @@ class CommentsRepository:
         """
 
         return self._db.query(Comment).filter(Comment.photo_id == photo_id).all()
-    
+
     async def get_comment_by_id(self, comment_id: int) -> Optional[CommentOut]:
         """
         A function that returns all comments for a given photo.
@@ -94,4 +103,3 @@ class CommentsRepository:
         :return: List of comments for a given photo.
         """
         return self._db.query(Comment).filter(Comment.id == comment_id).first()
-

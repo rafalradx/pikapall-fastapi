@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 from src.repository.ratings import RatingRepository
 from dependencies import get_rating_repository, get_photos_repository, PhotoRepository
-from src.schemas.photo import RatingOut
+from src.schemas.ratings import RatingOut
 from src.services.auth_user import get_current_user
 from src.schemas.users import UserOut, RoleEnum
 
@@ -23,7 +23,7 @@ async def get_ratings(
 
     if not existing_ratings:
         raise HTTPException(status_code=404, detail="Ratings not found.")
-    
+
     return existing_ratings
 
 
@@ -39,7 +39,9 @@ async def get_rating_by_id(
     if current_user.role in [RoleEnum.admin, RoleEnum.mod]:
         existing_ratings = await rating_repo.get_rating_by_id(rating_id)
     else:
-        existing_ratings = await rating_repo.get_user_rating_by_id(rating_id, current_user.id)
+        existing_ratings = await rating_repo.get_user_rating_by_id(
+            rating_id, current_user.id
+        )
 
     if not existing_ratings:
         raise HTTPException(status_code=404, detail="Rating not found.")
@@ -58,7 +60,9 @@ async def get_ratings_for_photo(
     if current_user.role in [RoleEnum.admin, RoleEnum.mod]:
         existing_ratings = await rating_repo.get_ratings_for_photo(photo_id)
     else:
-        existing_ratings = await rating_repo.get_user_rating_for_photo(photo_id, current_user.id)
+        existing_ratings = await rating_repo.get_user_rating_for_photo(
+            photo_id, current_user.id
+        )
 
     if not existing_ratings:
         raise HTTPException(status_code=404, detail="Ratings not found.")
@@ -80,7 +84,10 @@ async def get_user_ratings(
         if current_user.id == user_id:
             existing_ratings = await rating_repo.get_user_ratings(user_id)
         else:
-            raise HTTPException(status_code=404, detail="Ratings not found or you have not permission to display these ratings.")
+            raise HTTPException(
+                status_code=404,
+                detail="Ratings not found or you have not permission to display these ratings.",
+            )
 
     if not existing_ratings:
         raise HTTPException(status_code=404, detail="Ratings not found.")
@@ -103,9 +110,7 @@ async def create_rating(
 
     photo = await photos_repository.get_photo_by_id(photo_id)
     if photo.user_id == current_user.id:
-        raise HTTPException(
-            status_code=400, detail="You can't rate your own photos."
-        )
+        raise HTTPException(status_code=400, detail="You can't rate your own photos.")
 
     existing_rating = await rating_repo.get_user_rating_for_photo(
         photo_id, current_user.id
@@ -114,7 +119,7 @@ async def create_rating(
         raise HTTPException(
             status_code=400, detail="You have already rated this photo."
         )
-    
+
     if rating < 1 or rating > 5:
         raise HTTPException(status_code=400, detail="Rating must be between 1 and 5.")
     created_rating = await rating_repo.create_rating(photo_id, current_user.id, rating)
@@ -139,7 +144,8 @@ async def delete_rating(
         RoleEnum.mod,
     ]:
         raise HTTPException(
-            status_code=403, detail="You are not allowed to delete this rating. Only Administrators and Moderators can delete all ratings."
+            status_code=403,
+            detail="You are not allowed to delete this rating. Only Administrators and Moderators can delete all ratings.",
         )
 
     deleted = await rating_repo.delete_rating(
