@@ -58,10 +58,19 @@ class CloudinaryImageProvider(AbstractImageProvider):
     def transform(self, public_id: str, transform: TransformationInput) -> str:
         """
         Apply transformation to an image.
-
-        :param url: URL of the image.
-        :param transform: Transformation parameters.
-        :return: Transformed image URL.
+        This method takes the URL of an image and applies transformation parameters to it,
+        generating a new URL for the transformed image.
+        :param url: URL of the original image.
+        :type url: str
+        :param transform: Transformation parameters such as width, height, crop, effect, and angle
+        :param width: The desired width of the transformed image in pixels. Defaults to None.
+        :param height: The desired height of the transformed image in pixels. Defaults to None.
+        :param crop: The type of cropping to apply to the image. Possible values are "fill", "fit", "scale", "thumb", "crop", "lfill", "limit", and "pad". Defaults to None.
+        :param effect: The effect to apply to the image. Possible values are "sepia", "grayscale", "blur", "pixelate", "brightness", "contrast", "saturation", and "hue". Defaults to None.
+        :param angle: The angle of rotation for the image in degrees. Defaults to None.
+        :type transform: TransformationInput
+        :return: URL of the transformed image.
+        :rtype: str
         """
         transformed_image_url = cloudinary.CloudinaryImage(public_id).build_url(
             **transform.model_dump()
