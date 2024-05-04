@@ -1,14 +1,17 @@
 import unittest
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, call
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from src.repository.photos import PhotoRepository
 from src.schemas.photo import PhotoCreate, PhotoUpdateOut
-from src.database.models import Photo, Tag
+from src.database.models import Photo, Tag, Rating
+from datetime import datetime
+
 
 
 class TestPhotoRepository(unittest.IsolatedAsyncioTestCase):
     def setUp(self):
+
         self.db = MagicMock(spec=Session)
         self.repository = PhotoRepository(self.db)
 
@@ -80,33 +83,72 @@ class TestPhotoRepository(unittest.IsolatedAsyncioTestCase):
             "You don't have permission to delete this photo" in str(context.exception)
         )
 
-    async def test_get_all_photos(self):
-        photos = [Photo(id=1), Photo(id=2)]
-        self.db.query.return_value.all.return_value = photos
+    async def test_get_photos_no_filters(self):
+        expected_result = []  
+        self.db.query.return_value.filter.return_value.all.return_value = expected_result
+        result = await self.repository.get_photos()
+        self.db.query.assert_called_once_with(Photo)
+        assert len(result) == len(expected_result)
 
-        result = await self.repository.get_all_photos()
+    async def test_get_photos_with_avg_rating_above_filter(self):
+        avg_rating_above = 4.5
+        expected_query = (
+            self.db.query.return_value.filter.return_value.all.return_value
+        ) = []
+        await self.repository.get_photos(avg_rating_above=avg_rating_above)
+        self.db.query.assert_called_once_with(Photo)
+        result = self.db.query.return_value.filter.return_value.all.return_value
+        assert len(result) == len(expected_query)
 
-        self.assertEqual(result, photos)
+    async def test_get_photos_with_avg_rating_below_filter(self):
+        avg_rating_below = 3.5
+        expected_query = (
+            self.db.query.return_value.filter.return_value.all.return_value
+        ) = []
+        await self.repository.get_photos(avg_rating_below=avg_rating_below)
+        self.db.query.assert_called_once_with(Photo)
+        result = self.db.query.return_value.filter.return_value.all.return_value
+        assert len(result) == len(expected_query)
 
-    async def test_search_photos_by_tag(self):
-        tag = "test_tag"
-        photos = [Photo(id=1), Photo(id=2)]
-        self.db.query.return_value.filter.return_value.all.return_value = photos
+    async def test_get_photos_with_created_after_filter(self):
+        created_after = datetime(2024, 5, 1)
+        expected_query = (
+            self.db.query.return_value.filter.return_value.all.return_value
+        ) = []
+        await self.repository.get_photos(created_after=created_after)
+        self.db.query.assert_called_once_with(Photo)
+        result = self.db.query.return_value.filter.return_value.all.return_value
+        assert len(result) == len(expected_query)
 
-        result = await self.repository.search_photos_by_tag(tag)
+    async def test_get_photos_with_created_before_filter(self):
+        created_before = datetime(2024, 5, 1)
+        expected_query = (
+            self.db.query.return_value.filter.return_value.all.return_value
+        ) = []
+        await self.repository.get_photos(created_before=created_before)
+        self.db.query.assert_called_once_with(Photo)
+        result = self.db.query.return_value.filter.return_value.all.return_value
+        assert len(result) == len(expected_query)
 
-        self.assertEqual(result, photos)
+    async def test_get_photos_with_keyword_filter(self):
+        keyword = "landscape"
+        expected_query = (
+            self.db.query.return_value.filter.return_value.all.return_value
+        ) = []
+        await self.repository.get_photos(keyword=keyword)
+        self.db.query.assert_called_once_with(Photo)
+        result = self.db.query.return_value.filter.return_value.all.return_value
+        assert len(result) == len(expected_query)
 
-    async def test_filter_photos(self):
-        photos = [Photo(id=1), Photo(id=2)]
-        self.db.query.return_value.all.return_value = photos
-
-        result = await self.repository.filter_photos(
-            tag="test_tag", start_date="2024-01-01", end_date="2024-05-01"
-        )
-
-        self.assertEqual(result, photos)
-
+    async def test_get_photos_with_user_id_filter(self):
+        user_id = 1
+        expected_query = (
+            self.db.query.return_value.filter.return_value.all.return_value
+        ) = []
+        await self.repository.get_photos(user_id=user_id)
+        self.db.query.assert_called_once_with(Photo)
+        result = self.db.query.return_value.filter.return_value.all.return_value
+        assert len(result) == len(expected_query)
 
 if __name__ == "__main__":
     unittest.main()
