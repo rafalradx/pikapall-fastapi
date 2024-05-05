@@ -9,6 +9,11 @@ class RoleEnum(str, Enum):
     user = "standard"
 
 
+class RolePromote(str, Enum):
+    mod = "moderator"
+    user = "standard"
+
+
 class UserIn(BaseModel):
     """
     Pydantic model representing input data for creating a user.
