@@ -67,7 +67,8 @@ To get cloudinary you have to create account on : https://cloudinary.com/
 To terminal paste: "python main.py" , P.S. You have to be in your project directory "cd path/to/project"
 
 Now you should see :
-"- @app.on_event("startup")
+"
+- @app.on_event("startup")
 - INFO:     Started server process [8905]
 - INFO:     Waiting for application startup.
 - INFO:     Application startup complete.
