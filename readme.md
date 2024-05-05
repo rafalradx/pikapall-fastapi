@@ -35,7 +35,8 @@ pip install -r requirements.txt
 5. Configure the environment variables:
 To run application you have to create a file ".env" in project directory
 
-```# Copy this code to your ".env":
+```
+# Copy this code to your ".env":
 #
 # PostgreSQL Configuration
 POSTGRES_DB=postgres
@@ -57,7 +58,8 @@ JWT_REF_EXPIRE_DAYS=7
 # Cloudinary Configuration
 CLOUDINARY_NAME={your_cloudinary_name}
 CLOUDINARY_API_KEY={your_cloudinary_api_key}
-CLOUDINARY_API_SECRET={your_cloudinary_api_secret}```
+CLOUDINARY_API_SECRET={your_cloudinary_api_secret}
+```
 
 To get cloudinary you have to create account on : https://cloudinary.com/
 
