@@ -1,8 +1,7 @@
 from src.repository.abstract import AbstractUserRepository
 from src.database.models import User
-from src.schemas.users import UserIn, UserOut, UserChangeRole
+from src.schemas.users import UserIn, UserOut
 from sqlalchemy.orm import Session
-from fastapi import HTTPException
 from src.schemas.users import RoleEnum
 
 
@@ -72,9 +71,7 @@ class UserRepository(AbstractUserRepository):
         self._session.refresh(new_user)
         return new_user
 
-    async def change_user_role(
-        self, user_id: int, role: RoleEnum
-    ) -> UserOut | None:
+    async def change_user_role(self, user_id: int, role: RoleEnum) -> UserOut | None:
         """
         Retrieve a first user from the database.
         :param email: The email of the user to retrieve.
@@ -86,7 +83,7 @@ class UserRepository(AbstractUserRepository):
         """
         user = await self.get_user_by_id(user_id)
         if role.value:
-                user.role = role.value
+            user.role = role.value
         self._session.commit()
         self._session.refresh(user)
         return user

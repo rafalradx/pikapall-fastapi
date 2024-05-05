@@ -1,7 +1,6 @@
 from sqlalchemy.orm import Session
 from src.database.models import Comment
 from datetime import datetime
-from src.schemas.users import RoleEnum
 from src.schemas.comments import CommentIn, CommentOut, CommentUpdate
 from typing import Optional
 

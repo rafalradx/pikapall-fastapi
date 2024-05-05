@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, HTTPException
-from datetime import datetime
 from src.schemas.users import RoleEnum, UserOut
 from src.schemas.comments import CommentIn, CommentOut, CommentUpdate
 from src.repository.comments import CommentsRepository

@@ -1,7 +1,7 @@
 from src.repository.abstract import AbstractUserRepository
 from src.services.image_provider import AbstractImageProvider, CloudinaryImageProvider
 from src.services.pwd_handler import AbstractPasswordHashHandler, BcryptPasswordHandler
-from src.database.db import SessionLocal
+from src.database.db import get_db
 from src.repository.users import UserRepository
 from src.repository.photos import PhotoRepository
 from src.repository.tags import TagRepository
@@ -12,23 +12,23 @@ from redis.asyncio import Redis
 
 
 def get_users_repository() -> AbstractUserRepository:
-    return UserRepository(SessionLocal())
+    return UserRepository(next(get_db()))
 
 
 def get_photos_repository() -> PhotoRepository:
-    return PhotoRepository(SessionLocal())
+    return PhotoRepository(next(get_db()))
 
 
 def get_tags_repository() -> TagRepository:
-    return TagRepository(SessionLocal())
+    return TagRepository(next(get_db()))
 
 
 def get_rating_repository() -> RatingRepository:
-    return RatingRepository(SessionLocal())
+    return RatingRepository(next(get_db()))
 
 
 def get_comments_repository() -> CommentsRepository:
-    return CommentsRepository(SessionLocal())
+    return CommentsRepository(next(get_db()))
 
 
 def get_image_provider() -> AbstractImageProvider:

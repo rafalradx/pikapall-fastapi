@@ -4,7 +4,6 @@ from sqlalchemy.orm import Session
 from src.database.models import Comment
 from src.repository.comments import CommentsRepository
 from src.schemas.comments import CommentIn, CommentOut, CommentUpdate
-from src.schemas.users import RoleEnum
 from datetime import datetime
 
 
