@@ -39,21 +39,21 @@ pip install pipfile
 To run application you have to create a file ".env" in project directory
 
 Copy this code to your ".env" :
-POSTGRES_DB=postgres
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=567234
-POSTGRES_PORT=5432
-SQLALCHEMY_DATABASE_URL=postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:${POSTGRES_PORT}/${POSTGRES_DB}
-REDIS_HOST=localhost
-REDIS_PORT=6379
-JWT_SECRET_KEY=a9bk2vhXAcZEJPQu-3jBhlRB8G1i5GvPrUW0mR1W0-0
-JWT_ALGORITHM=HS256
-JWT_EXPIRE_MINUTES=15
-JWT_REF_EXPIRE_DAYS=7
+-POSTGRES_DB=postgres
+-POSTGRES_USER=postgres
+-POSTGRES_PASSWORD=567234
+-POSTGRES_PORT=5432
+-SQLALCHEMY_DATABASE_URL=postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:${POSTGRES_PORT}/${POSTGRES_DB}
+-REDIS_HOST=localhost
+-REDIS_PORT=6379
+-JWT_SECRET_KEY=a9bk2vhXAcZEJPQu-3jBhlRB8G1i5GvPrUW0mR1W0-0
+-JWT_ALGORITHM=HS256
+-JWT_EXPIRE_MINUTES=15
+-JWT_REF_EXPIRE_DAYS=7
 
-CLOUDINARY_NAME={your_cloudinary_name}
-CLOUDINARY_API_KEY={your_cloudinary_api_key}
-CLOUDINARY_API_SECRET={your_cloudinary_api_secret}
+-CLOUDINARY_NAME={your_cloudinary_name}
+-CLOUDINARY_API_KEY={your_cloudinary_api_key}
+-CLOUDINARY_API_SECRET={your_cloudinary_api_secret}
 
 To get cloudinary you have to create account on : https://cloudinary.com/
 
@@ -67,11 +67,11 @@ To get cloudinary you have to create account on : https://cloudinary.com/
 To terminal paste: "python main.py" , P.S. You have to be in your project directory "cd path/to/project"
 
 Now you should see :
-"@app.on_event("startup")
-INFO:     Started server process [8905]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)"
+"-@app.on_event("startup")
+-INFO:     Started server process [8905]
+-INFO:     Waiting for application startup.
+-INFO:     Application startup complete.
+-INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)"
 
 
 copy adress "http://0.0.0.0:8000" to your browser and enjoy our application :)
