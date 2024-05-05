@@ -68,11 +68,16 @@ To get cloudinary you have to create account on : https://cloudinary.com/
 Database nad redis configuration from `.env` is imported in `docker-compose.yaml`
 ## Running
 1. Run docker-compose to start containers:
-```
-docker-compose up -d
-```
-2. Run the application:
-To terminal paste: "python main.py"
+
+`docker-compose up -d` or `docker compose up -d`
+
+2. Start the application by running the `main.py` directly:
+
+`python main.py`
+
+or more explicitly by running it on a `uvicorn` server:
+
+`uvicorn main:app --host localhost --port 8000 --reload`
 
 Now you should see :
 ```
