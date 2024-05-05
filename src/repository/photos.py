@@ -4,8 +4,8 @@ from fastapi import HTTPException
 from src.database.models import Photo, Tag, Rating
 from src.schemas.photo import PhotoCreate, PhotoUpdateOut, PhotoOut
 from typing import List, Optional
-from src.repository.tags import TagRepository
 from sqlalchemy import or_
+
 
 class PhotoRepository:
     def __init__(self, db: Session):
@@ -102,7 +102,6 @@ class PhotoRepository:
         else:
             return None
 
-
     async def get_photos(
         self,
         keyword: str = None,
@@ -125,15 +124,25 @@ class PhotoRepository:
 
         query = self.db.query(Photo)
         if keyword:
-            query = query.filter(or_(Photo.tags.any(Tag.name.ilike(word)), Photo.description.ilike(word)))
+            query = query.filter(
+                or_(Photo.tags.any(Tag.name.ilike(word)), Photo.description.ilike(word))
+            )
         if created_after:
             query = query.filter(Photo.created_at > created_after)
         if created_before:
             query = query.filter(Photo.created_at < created_before)
         if avg_rating_above:
-            query = query.outerjoin(Rating).group_by(Photo.id).having(func.avg(Rating.rating) > avg_rating_above)
+            query = (
+                query.outerjoin(Rating)
+                .group_by(Photo.id)
+                .having(func.avg(Rating.rating) > avg_rating_above)
+            )
         if avg_rating_below:
-            query = query.outerjoin(Rating).group_by(Photo.id).having(func.avg(Rating.rating) < avg_rating_below)
+            query = (
+                query.outerjoin(Rating)
+                .group_by(Photo.id)
+                .having(func.avg(Rating.rating) < avg_rating_below)
+            )
         if user_id:
             query = query.filter(Photo.user_id == user_id)
         return query.all()

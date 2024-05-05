@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from src.schemas.photo import (
     PhotoCreate,
     PhotoIn,
@@ -158,7 +158,10 @@ async def delete_photo(
 
     photo = await photos_repository.get_photo_by_id(photo_id)
     if photo.user_id != current_user.id and current_user.role != RoleEnum.admin:
-        raise HTTPException(status_code=403, detail="You can't delete another user's photo if you're not an administrator.")
+        raise HTTPException(
+            status_code=403,
+            detail="You can't delete another user's photo if you're not an administrator.",
+        )
 
     deleted_photo = await photos_repository.delete_photo(photo_id, current_user.id)
 
@@ -169,7 +172,9 @@ async def delete_photo(
 
 
 @router.get(
-    "/", response_model=list[PhotoOut], summary="Display and/or search and/or filter photos by criteria."
+    "/",
+    response_model=list[PhotoOut],
+    summary="Display and/or search and/or filter photos by criteria.",
 )
 async def get_photos(
     keyword: str = None,
@@ -201,15 +206,23 @@ async def get_photos(
     :return: List of filtered photos.
     """
     if current_user.role not in [RoleEnum.admin, RoleEnum.mod] and user_id != None:
-        raise HTTPException(status_code=403, detail="Only administrators and moderators can search for photos by user_id.")
+        raise HTTPException(
+            status_code=403,
+            detail="Only administrators and moderators can search for photos by user_id.",
+        )
 
     photos = await photos_repository.get_photos(
-        keyword, created_after, created_before, avg_rating_above, avg_rating_below, user_id
+        keyword,
+        created_after,
+        created_before,
+        avg_rating_above,
+        avg_rating_below,
+        user_id,
     )
 
     if not photos:
         raise HTTPException(status_code=404, detail="No photos found.")
-    
+
     return photos
 
 

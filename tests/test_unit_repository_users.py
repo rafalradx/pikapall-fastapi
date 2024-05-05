@@ -1,5 +1,4 @@
 import unittest
-from fastapi import HTTPException, status
 from unittest.mock import MagicMock
 from sqlalchemy.orm import Session
 from src.database.models import User
@@ -37,6 +36,7 @@ class TestUsers(unittest.IsolatedAsyncioTestCase):
         token = "12345678900987654321"
         await self.users_repository.update_token(user=user, token=token)
         self.session.commit.assert_called_once()
+
 
 if __name__ == "__main__":
     unittest.main()

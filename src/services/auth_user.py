@@ -1,5 +1,4 @@
 import pickle
-
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from redis.asyncio import Redis

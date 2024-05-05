@@ -1,7 +1,6 @@
 from typing import Optional
 from sqlalchemy.orm import Session
 from src.database.models import Rating
-from datetime import datetime
 from src.schemas.users import RoleEnum
 
 
@@ -28,7 +27,9 @@ class RatingRepository:
         self._db.refresh(new_rating)
         return new_rating
 
-    async def delete_rating(self, rating_id: int, user_role: RoleEnum, user_id: int) -> bool:
+    async def delete_rating(
+        self, rating_id: int, user_role: RoleEnum, user_id: int
+    ) -> bool:
         """
         Delete a rating.
 
@@ -38,22 +39,23 @@ class RatingRepository:
         :return: True if the rating was successfully deleted, False otherwise.
         """
         if user_role in [RoleEnum.admin, RoleEnum.mod]:
-            rating = self._db.query(Rating).filter(
-                Rating.id == rating_id).first()
+            rating = self._db.query(Rating).filter(Rating.id == rating_id).first()
             if rating:
                 self._db.delete(rating)
                 self._db.commit()
                 return True
         else:
-            rating = self._db.query(Rating).filter(
-                Rating.id == rating_id, Rating.user_id == user_id).first()
+            rating = (
+                self._db.query(Rating)
+                .filter(Rating.id == rating_id, Rating.user_id == user_id)
+                .first()
+            )
             if rating:
                 self._db.delete(rating)
                 self._db.commit()
                 return True
         return False
-    
-    
+
     async def get_ratings(self) -> Optional[list[Rating]]:
         """
         Retrieve all ratings.
@@ -61,7 +63,7 @@ class RatingRepository:
         :return: The rating object if found, else None.
         """
         return self._db.query(Rating).filter().all()
-    
+
     async def get_rating_by_id(self, rating_id: int) -> Optional[Rating]:
         """
         Retrieve a rating by its ID.
@@ -70,7 +72,7 @@ class RatingRepository:
         :return: The rating object if found, else None.
         """
         return self._db.query(Rating).filter(Rating.id == rating_id).first()
-    
+
     async def get_ratings_for_photo(self, photo_id: int) -> Optional[list[Rating]]:
         """
         Retrieve all ratings for a photo.
@@ -90,7 +92,9 @@ class RatingRepository:
         """
         return self._db.query(Rating).filter(Rating.user_id == user_id).all()
 
-    async def get_user_rating_for_photo(self, photo_id: int, user_id: int) -> Optional[Rating]:
+    async def get_user_rating_for_photo(
+        self, photo_id: int, user_id: int
+    ) -> Optional[Rating]:
         """
         Retrieve the rating given by a user for a specific photo.
 
@@ -98,9 +102,15 @@ class RatingRepository:
         :param user_id: User ID.
         :return: The rating given by the user for the photo, if it exists.
         """
-        return self._db.query(Rating).filter(Rating.photo_id == photo_id, Rating.user_id == user_id).first()
-    
-    async def get_user_rating_by_id(self, rating_id: int, user_id: int) -> Optional[Rating]:
+        return (
+            self._db.query(Rating)
+            .filter(Rating.photo_id == photo_id, Rating.user_id == user_id)
+            .first()
+        )
+
+    async def get_user_rating_by_id(
+        self, rating_id: int, user_id: int
+    ) -> Optional[Rating]:
         """
         Retrieve the rating given by a user for a specific photo.
 
@@ -108,5 +118,8 @@ class RatingRepository:
         :param user_id: User ID.
         :return: The rating given by the user for the photo, if it exists.
         """
-        return self._db.query(Rating).filter(Rating.id == rating_id, Rating.user_id == user_id).first()
-
+        return (
+            self._db.query(Rating)
+            .filter(Rating.id == rating_id, Rating.user_id == user_id)
+            .first()
+        )
