@@ -13,35 +13,37 @@
 ## Prerequisites
 Make sure your environment meets the following requirements:
 - Python 3.11 or newer with pip
-- PostgreSQL database (other databases may be required if your application's requirements differ)
+- PostgreSQL database
+- redis for caching
+- Docker for runing the containers with database and redis
 - Any code editor (e.g., Visual Studio Code, PyCharm)
 
 ## Installation
 1. Clone the repository:
 Paste this URL to terminal:
 
-git clone https://github.com/rafalradx/pikapall-fastapi.git
+`git clone https://github.com/rafalradx/pikapall-fastapi.git`
 
 2. Navigate to the cloned repository:
-cd pikapall-fastapi
+`cd pikapall-fastapi`
 
 3. Create a Python virtual environment (recommended but optional):
-python3 -m venv venv
+`python3 -m venv venv`
 
 4. Activate your venv nad install dependencies using pip:
-pip install -r requirements.txt
+`pip install -r requirements.txt`
 
 
-5. Configure the environment variables:
-To run application you have to create a file ".env" in project directory
+5. Configure the environment variables
+To run application you have to create a file `.env` in project directory
 
 ```
-# Copy this code to your ".env":
+# Copy this code to your .env":
 #
 # PostgreSQL Configuration
 POSTGRES_DB=postgres
 POSTGRES_USER=postgres
-POSTGRES_PASSWORD=567234
+POSTGRES_PASSWORD=your_strong_db_password
 POSTGRES_PORT=5432
 SQLALCHEMY_DATABASE_URL=postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:${POSTGRES_PORT}/${POSTGRES_DB}
 
@@ -50,7 +52,7 @@ REDIS_HOST=localhost
 REDIS_PORT=6379
 
 # JWT Configuration
-JWT_SECRET_KEY=a9bk2vhXAcZEJPQu-3jBhlRB8G1i5GvPrUW0mR1W0-0
+JWT_SECRET_KEY=sequence_of_random_characters
 JWT_ALGORITHM=HS256
 JWT_EXPIRE_MINUTES=15
 JWT_REF_EXPIRE_DAYS=7
@@ -63,23 +65,25 @@ CLOUDINARY_API_SECRET={your_cloudinary_api_secret}
 
 To get cloudinary you have to create account on : https://cloudinary.com/
 
-
+Database nad redis configuration from `.env` is imported in `docker-compose.yaml`
 ## Running
-1. Ensure your database is running and configured according to the settings in the `.env` file.
-1.1 To run application you have to run docker, and paste "docker compose up"
+1. Run docker-compose to start containers:
+```
+docker-compose up -d
+```
 2. Run the application:
-To terminal paste: "python main.py" , P.S. You have to be in your project directory "cd path/to/project"
+To terminal paste: "python main.py"
 
 Now you should see :
-"
+```
 - @app.on_event("startup")
 - INFO:     Started server process [8905]
 - INFO:     Waiting for application startup.
 - INFO:     Application startup complete.
-- INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)"
+- INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)"
+```
 
-
-copy adress "http://0.0.0.0:8000" to your browser and enjoy our application :)
+copy adress `http://127.0.0.1:8000` to your browser and enjoy our application :)
 
 
 ## Contributing
