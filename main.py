@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from src.routes import auth, tags, photo, users, comments, ratings
@@ -39,7 +39,22 @@ async def startup():
     """
     Initialize FastAPI requests limiter
     """
-    await FastAPILimiter.init(get_redis_client())
+    async with get_redis_client() as redis:
+        await FastAPILimiter.init(redis)
+
+
+# async def cleanup_tasks():
+#     # Perform cleanup tasks here
+#     print("Performing cleanup tasks...")
+#     print("Cleanup tasks completed.")
+
+
+# @app.on_event("shutdown")
+# async def shutdown_event():
+#     # Shutdown event handler
+#     print("Shutting down...")
+#     await cleanup_tasks()
+#     print("Shutdown complete.")
 
 
 @app.get("/")

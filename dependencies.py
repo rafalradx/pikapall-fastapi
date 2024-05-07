@@ -1,3 +1,4 @@
+from typing import AsyncGenerator
 from src.repository.abstract import AbstractUserRepository
 from src.services.image_provider import AbstractImageProvider, CloudinaryImageProvider
 from src.services.pwd_handler import AbstractPasswordHashHandler, BcryptPasswordHandler
@@ -9,6 +10,7 @@ from src.repository.comments import CommentsRepository
 from src.repository.ratings import RatingRepository
 from src.config import settings
 from redis.asyncio import Redis
+from contextlib import asynccontextmanager
 
 
 def get_users_repository() -> AbstractUserRepository:
@@ -44,12 +46,19 @@ def get_password_handler() -> AbstractPasswordHashHandler:
     return BcryptPasswordHandler()
 
 
-def get_redis_client() -> Redis:
-    Redis()
-    return Redis(
+@asynccontextmanager
+async def get_redis_client() -> AsyncGenerator[Redis, None]:
+    """
+    Context manager for getting a Redis client with the specified configuration.
+    """
+    redis_client = Redis(
         host=settings.redis_host,
         port=settings.redis_port,
         db=0,
         encoding="utf-8",
         decode_responses=False,
     )
+    try:
+        yield redis_client
+    finally:
+        await redis_client.close()

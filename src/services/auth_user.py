@@ -13,7 +13,6 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 async def get_current_user(
     token: OAuth2PasswordBearer = Depends(oauth2_scheme),
     users_repository: AbstractUserRepository = Depends(get_users_repository),
-    redis: Redis = Depends(get_redis_client),
 ) -> UserOut:
     """
     Get the current authenticated user.
@@ -36,9 +35,11 @@ async def get_current_user(
     :raises HTTPException 401: If the credentials are invalid.
     """
     user_email = await auth_service.get_email_from_access_token(token=token)
-    user = await redis.get(f"user:{user_email}")
-    if user is not None:
-        return pickle.loads(user)
+
+    async with get_redis_client() as redis:
+        user = await redis.get(f"user:{user_email}")
+        if user is not None:
+            return pickle.loads(user)
 
     user = await users_repository.get_user_by_email(user_email)
     if user is None:
@@ -46,6 +47,8 @@ async def get_current_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
         )
-    await redis.set(f"user:{user_email}", pickle.dumps(user))
-    await redis.expire(f"user:{user_email}", 900)
+
+    async with get_redis_client() as redis:
+        await redis.set(f"user:{user_email}", pickle.dumps(user))
+        await redis.expire(f"user:{user_email}", 900)
     return user
