@@ -11,7 +11,6 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 # db session with automatic closing
 def get_db():
     db = SessionLocal()
-    print("DB read")
     try:
         yield db
     except Exception as err:
